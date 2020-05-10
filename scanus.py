@@ -6,18 +6,18 @@ subtitles_files_extensions = ['.srt','.ass','.ssa']
 attach_font_extensions = ['.ttf','.otf']
 
 def get_name_templates(path):    
-    """ Scans all files in a folder and subfolders for video files returns a dict
+    """ Scans all files in a folder and subfolders for video files returns a template dict
         
         Keyword arguments:
         path -- path to anime release
 
-        dict content:
+        template dict content:
         key -- video file name without extention
         val -- list
                     * absolute path
-                    * subtitle list
-                    * audio list 
-                    * font list
+                    * empty subtitle list
+                    * empty audio list 
+                    * empty font list
     """
     
     result_dict = {}
@@ -33,11 +33,11 @@ def get_name_templates(path):
 
 def get_subtitles_from_templates(path,template_dict):    
     """ Scans all files in a folder and subfolders for subtitles file
-        and adds information about subtitles to each dict entry
+        and adds information about subtitles to each template_dict entry
         
         Keyword arguments:
         path -- path to anime release
-        dict -- name template dict from get_name_templates()
+        template_dict -- template dict from get_name_templates()
 
         Subtitle list entity content:
         path -- path to subtitle file
@@ -62,11 +62,11 @@ def get_subtitles_from_templates(path,template_dict):
 
 def get_audio_from_templates(path,template_dict):    
     """ Scans all files in a folder and subfolders for audio file
-        and adds information about audio to each dict entry
+        and adds information about audio to each template_dict entry
         
         Keyword arguments:
         path -- path to anime release
-        dict -- name template dict from get_name_templates()
+        template_dict -- template dict from get_name_templates()
 
         Audio list entity content:
         path -- path to audio file
@@ -116,7 +116,7 @@ def get_font_list(path):
     func_result = _get_font_list(dir)
     return func_result[0]
     
-def scanus(path):
+def scan_directory(path):
     """Scans all files in a folder and subfolders end return dict
 
         Keyword arguments:
@@ -137,5 +137,6 @@ def scanus(path):
         result_dict[i][3] = font_list[:]
     return result_dict
     
-path = 'G:\Girls und Panzer [BD] [720p]'
-print(scanus(path))
+
+if __name__ == "__main__":
+    print('Sorry but scanus isn\'t executable program')
