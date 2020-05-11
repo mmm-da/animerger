@@ -121,7 +121,7 @@ def get_font_list(path):
                         result_sublist.append(str(child))
         return (result_sublist, font_list)
 
-    func_result = _get_font_list(dir)
+    func_result = _get_font_list(path)
     return func_result[0]
 
 
@@ -148,4 +148,5 @@ def scan_directory(path):
 
 
 if __name__ == "__main__":
+    print(scan_directory("G:\Gochuumon wa Usagi Desuka [BD] [720p]"))
     print("Sorry but scanus isn't executable program")
