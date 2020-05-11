@@ -28,8 +28,8 @@ def get_name_templates(path):
 
     result_dict = {}
 
-    dir = Path(path)
-    for child in dir.iterdir():
+    path = Path(path)
+    for child in path.iterdir():
         if child.is_dir():
             result_dict.update(get_name_templates(child))
         else:
@@ -81,7 +81,7 @@ def get_subtitles_from_templates(path, template_dict):
     """
 
     result_dict = template_dict
-    dir = Path(path)
+    path = Path(path)
     for child in dir.iterdir():
         if child.is_dir():
             result_dict.update(get_subtitles_from_templates(child, template_dict))
@@ -117,7 +117,7 @@ def get_audio_from_templates(path, template_dict):
     """
 
     result_dict = template_dict
-    dir = Path(path)
+    path = Path(path)
     for child in dir.iterdir():
         if child.is_dir():
             result_dict.update(get_audio_from_templates(child, template_dict))
@@ -145,7 +145,7 @@ def get_all_font_list(path):
         path -- path to anime release
     """
 
-    dir = Path(path)
+    path = Path(path)
     result_dict = {}
     for child in dir.iterdir():
         if child.is_dir():
