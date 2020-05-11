@@ -1,5 +1,7 @@
 import ass
 import re
+import os
+import pysrt
 from iso639 import languages
 from langdetect import detect
 from pathlib import Path
@@ -44,15 +46,27 @@ def detect_subtitle_lang(subtitle_path):
         subtitle_path -- path to subtitle file
     """
     subtitle_text = ""
-
-    with open(str(subtitle_path), encoding="utf_8_sig") as file:
-        sub = ass.parse(file)
-        for i in sub.events:
-            subtitle_text += re.sub(r"{.*}", "", i.text)
+    if subtitle_path.suffix == ".ass":
+        with open(str(subtitle_path), encoding="utf_8_sig") as file:
+            sub = ass.parse(file)
+            for i in sub.events:
+                subtitle_text += re.sub(r"{.*}", "", i.text)
+    elif subtitle_path.suffix == ".srt":
+        try:
+            sub = pysrt.open(str(subtitle_path))
+            pass
+        except UnicodeDecodeError:
+            sub = pysrt.open(str(subtitle_path), encoding="cp1251")
+            pass
+        else:
+            sub = pysrt.open(str(subtitle_path), encoding="iso-8859-1")
+        for i in sub:
+            subtitle_text += i.text
 
     alpha2 = detect(subtitle_text)
     language = languages.get(part1=alpha2)
     return language.part2t
+
 
 def get_subtitles_from_templates(path, template_dict):
     """Scans all files in a folder and subfolders for subtitles file
@@ -77,14 +91,18 @@ def get_subtitles_from_templates(path, template_dict):
             result_dict.update(get_subtitles_from_templates(child, template_dict))
         else:
             if child.suffix.lower() in subtitles_files_extensions:
-                if child.stem in result_dict:
+                parent_dir_name = Path(str(child) + "/..").resolve().stem
+                # nested check
+                unnested_name = Path(re.sub("." + parent_dir_name, "", child.name)).stem
+                if unnested_name in result_dict:
+                    subtitle_label = parent_dir_name
                     subtitle_entity = [
                         str(child),
-                        Path(str(child) + "/..").resolve().stem,
+                        subtitle_label,
                         detect_subtitle_lang(child),
                         0,
                     ]
-                    result_dict[child.stem][1].append(subtitle_entity)
+                    result_dict[unnested_name][1].append(subtitle_entity)
     return result_dict
 
 
@@ -111,13 +129,17 @@ def get_audio_from_templates(path, template_dict):
         else:
             if child.suffix.lower() in audio_files_extensions:
                 if child.stem in result_dict:
-                    subtitle_entity = [
+                    if (Path(str(child) + "/..").resolve().stem) == child.stem:
+                        audio_label = ""
+                    else:
+                        audio_label = Path(str(child) + "/..").resolve().stem
+                    audio_entity = [
                         str(child),
-                        Path(str(child) + "/..").resolve().stem,
+                        audio_label,
                         "rus",
                         0,
                     ]
-                    result_dict[child.stem][2].append(subtitle_entity)
+                    result_dict[child.stem][2].append(audio_entity)
     return result_dict
 
 
@@ -137,7 +159,7 @@ def get_all_font_list(path):
             if child.suffix.lower() in attach_font_extensions:
                 if not (child.name in result_dict):
                     result_dict[child.name] = str(child)
-    return list(result_dict.values())
+    return result_dict
 
 
 def scan_directory(path):
@@ -154,7 +176,7 @@ def scan_directory(path):
                     * audio list 
                     * font list
     """
-    font_list = get_all_font_list(path)
+    font_list = list(get_all_font_list(path).values())
     result_dict = get_name_templates(path)
     result_dict = get_subtitles_from_templates(path, result_dict)
     result_dict = get_audio_from_templates(path, result_dict)
@@ -164,4 +186,4 @@ def scan_directory(path):
 
 
 if __name__ == "__main__":
-    print("Sorry but scanus isn't executable program")
+    print("Scanus isn't executable module")
