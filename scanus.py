@@ -89,7 +89,7 @@ def get_subtitles_from_templates(path, template_dict):
             if child.suffix.lower() in subtitles_files_extensions:
                 parent_dir_name = Path(str(child) + "/..").resolve().stem
                 # nested check
-                unnested_name = Path(re.sub("." + parent_dir_name, "", child.name)).stem
+                unnested_name = Path(re.sub(r"\." + parent_dir_name, "", child.name)).stem
                 if unnested_name in result_dict:
                     subtitle_label = parent_dir_name
                     subtitle_entity = [
