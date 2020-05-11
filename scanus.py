@@ -1,6 +1,5 @@
 import ass
 import re
-import os
 import pysrt
 from iso639 import languages
 from langdetect import detect
@@ -13,18 +12,18 @@ attach_font_extensions = [".ttf", ".otf"]
 
 
 def get_name_templates(path):
-    """Scans all files in a folder and subfolders for video files returns a template dict
+    """Scans all files in a folder and subfolders for video files returns a template dict.
         
-        Keyword arguments:
-        path -- path to anime release
+    Keyword arguments:
+    path -- path to anime release
 
-        template dict content:
-        key -- video file name without extention
-        val -- list
-                    * absolute path
-                    * empty subtitle list
-                    * empty audio list
-                    * empty font list
+    template dict content:
+    key -- video file name without extention
+    val -- list
+                * absolute path
+                * empty subtitle list
+                * empty audio list
+                * empty font list
     """
 
     result_dict = {}
@@ -40,10 +39,10 @@ def get_name_templates(path):
 
 
 def detect_subtitle_lang(subtitle_path):
-    """Return subtitle language label in ISO 639-2t format
+    """Return subtitle language label in ISO 639-2t format.
 
-        Keyword arguments:
-        subtitle_path -- path to subtitle file
+    Keyword arguments:
+    subtitle_path -- path to subtitle file
     """
     subtitle_text = ""
     if subtitle_path.suffix == ".ass":
@@ -54,10 +53,8 @@ def detect_subtitle_lang(subtitle_path):
     elif subtitle_path.suffix == ".srt":
         try:
             sub = pysrt.open(str(subtitle_path))
-            pass
         except UnicodeDecodeError:
             sub = pysrt.open(str(subtitle_path), encoding="cp1251")
-            pass
         else:
             sub = pysrt.open(str(subtitle_path), encoding="iso-8859-1")
         for i in sub:
@@ -69,19 +66,18 @@ def detect_subtitle_lang(subtitle_path):
 
 
 def get_subtitles_from_templates(path, template_dict):
-    """Scans all files in a folder and subfolders for subtitles file
-        and adds information about subtitles to each template_dict entry
+    """Scans all files in a folder and subfolders for subtitles file and adds information about subtitles to each template_dict entry.
         
-        Keyword arguments:
-        path -- path to anime release
-        template_dict -- template dict from get_name_templates()
-        font_dict -- dictionary of fonts located at path
+    Keyword arguments:
+    path -- path to anime release
+    template_dict -- template dict from get_name_templates()
+    font_dict -- dictionary of fonts located at path
 
-        Subtitle list entity content:
-        path -- path to subtitle file
-        name -- subtitle label
-        lang -- subtitle language label in ISO 639-2t format
-        dispose -- mkv subtitle flag
+    Subtitle list entity content:
+    path -- path to subtitle file
+    name -- subtitle label
+    lang -- subtitle language label in ISO 639-2t format
+    dispose -- mkv subtitle flag
     """
 
     result_dict = template_dict
@@ -107,18 +103,17 @@ def get_subtitles_from_templates(path, template_dict):
 
 
 def get_audio_from_templates(path, template_dict):
-    """ Scans all files in a folder and subfolders for audio file
-        and adds information about audio to each template_dict entry
+    """ Scans all files in a folder and subfolders for audio file and adds information about audio to each template_dict entry.
         
-        Keyword arguments:
-        path -- path to anime release
-        template_dict -- template dict from get_name_templates()
+    Keyword arguments:
+    path -- path to anime release
+    template_dict -- template dict from get_name_templates()
 
-        Audio list entity content:
-        path -- path to audio file
-        name -- audio label
-        lang -- audio language label ISO 639(alpha3)
-        dispose -- mkv audio flag
+    Audio list entity content:
+    path -- path to audio file
+    name -- audio label
+    lang -- audio language label ISO 639(alpha3)
+    dispose -- mkv audio flag
     """
 
     result_dict = template_dict
@@ -144,7 +139,7 @@ def get_audio_from_templates(path, template_dict):
 
 
 def get_all_font_list(path):
-    """Scans all files in a folder and subfolders for font files return list of path to fonts
+    """Scans all files in a folder and subfolders for font files return list of path to fonts.
     
     Keyword arguments:
         path -- path to anime release
@@ -163,18 +158,18 @@ def get_all_font_list(path):
 
 
 def scan_directory(path):
-    """Scans all files in a folder and subfolders end return dict
+    """Scans all files in a folder and subfolders end return dict.
 
-        Keyword arguments:
-        path -- path to anime release
-        
-        dict content:
-        key -- video file name without extention
-        val -- list
-                    * absolute path
-                    * subtitle list
-                    * audio list 
-                    * font list
+    Keyword arguments:
+    path -- path to anime release
+
+    dict content:
+    key -- video file name without extention
+    val -- list
+        * absolute path
+        * subtitle list
+        * audio list
+        * font list
     """
     font_list = list(get_all_font_list(path).values())
     result_dict = get_name_templates(path)
