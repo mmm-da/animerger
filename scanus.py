@@ -148,5 +148,4 @@ def scan_directory(path):
 
 
 if __name__ == "__main__":
-    print(scan_directory("G:\Gochuumon wa Usagi Desuka [BD] [720p]"))
     print("Sorry but scanus isn't executable program")
