@@ -6,7 +6,7 @@ subtitles_files_extensions = ['.srt','.ass','.ssa']
 attach_font_extensions = ['.ttf','.otf']
 
 def get_name_templates(path):    
-    """ Scans all files in a folder and subfolders for video files returns a template dict
+    """Scans all files in a folder and subfolders for video files returns a template dict
         
         Keyword arguments:
         path -- path to anime release
@@ -16,7 +16,7 @@ def get_name_templates(path):
         val -- list
                     * absolute path
                     * empty subtitle list
-                    * empty audio list 
+                    * empty audio list
                     * empty font list
     """
     
@@ -31,8 +31,8 @@ def get_name_templates(path):
                 result_dict[child.stem] = [str(child),[],[],[]]
     return result_dict
 
-def get_subtitles_from_templates(path,template_dict):    
-    """ Scans all files in a folder and subfolders for subtitles file
+def get_subtitles_from_templates(path,template_dict):
+    """Scans all files in a folder and subfolders for subtitles file
         and adds information about subtitles to each template_dict entry
         
         Keyword arguments:
@@ -60,7 +60,7 @@ def get_subtitles_from_templates(path,template_dict):
                     result_dict[child.stem][1].append(subtitle_entity)
     return result_dict
 
-def get_audio_from_templates(path,template_dict):    
+def get_audio_from_templates(path,template_dict):
     """ Scans all files in a folder and subfolders for audio file
         and adds information about audio to each template_dict entry
         
@@ -95,11 +95,7 @@ def get_font_list(path):
     Keyword arguments:
         path -- path to anime release
     """
-
-    result_list = []
-    dir = Path(path)
-    font_list = set() 
-
+    font_list = set()
     def _get_font_list(path):
         dir = Path(path)
         result_sublist = []
@@ -136,7 +132,7 @@ def scan_directory(path):
     for i in result_dict:
         result_dict[i][3] = font_list[:]
     return result_dict
-    
+
 
 if __name__ == "__main__":
     print('Sorry but scanus isn\'t executable program')
