@@ -45,7 +45,7 @@ def detect_subtitle_lang(subtitle_path):
     subtitle_path -- path to subtitle file
     """
     subtitle_text = ""
-    if subtitle_path.suffix in [".ass",".ssa"]:
+    if subtitle_path.suffix in [".ass", ".ssa"]:
         with open(str(subtitle_path), encoding="utf_8_sig") as file:
             sub = ass.parse(file)
             for i in sub.events:
@@ -56,13 +56,13 @@ def detect_subtitle_lang(subtitle_path):
         except UnicodeDecodeError:
             sub = pysrt.open(str(subtitle_path), encoding="cp1251")
         else:
-            #detect not possible
-            return ''
+            # detect not possible
+            return ""
         for i in sub:
             subtitle_text += i.text
-    else: 
-        #detect not possible
-        return ''
+    else:
+        # detect not possible
+        return ""
     alpha2 = detect(subtitle_text)
     language = languages.get(part1=alpha2)
     return language.part2t
@@ -92,7 +92,9 @@ def get_subtitles_from_templates(path, template_dict):
             if child.suffix.lower() in subtitles_files_extensions:
                 parent_dir_name = Path(str(child) + "/..").resolve().stem
                 # nested check
-                unnested_name = Path(re.sub(r"\." + parent_dir_name, "", child.name)).stem
+                unnested_name = Path(
+                    re.sub(r"\." + parent_dir_name, "", child.name)
+                ).stem
                 if unnested_name in result_dict:
                     subtitle_label = parent_dir_name
                     subtitle_entity = [
