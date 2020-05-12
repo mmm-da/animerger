@@ -45,7 +45,7 @@ def detect_subtitle_lang(subtitle_path):
     subtitle_path -- path to subtitle file
     """
     subtitle_text = ""
-    if subtitle_path.suffix == ".ass":
+    if subtitle_path.suffix in [".ass",".ssa"]:
         with open(str(subtitle_path), encoding="utf_8_sig") as file:
             sub = ass.parse(file)
             for i in sub.events:
@@ -56,10 +56,13 @@ def detect_subtitle_lang(subtitle_path):
         except UnicodeDecodeError:
             sub = pysrt.open(str(subtitle_path), encoding="cp1251")
         else:
-            sub = pysrt.open(str(subtitle_path), encoding="iso-8859-1")
+            #detect not possible
+            return ''
         for i in sub:
             subtitle_text += i.text
-
+    else: 
+        #detect not possible
+        return ''
     alpha2 = detect(subtitle_text)
     language = languages.get(part1=alpha2)
     return language.part2t
@@ -82,7 +85,7 @@ def get_subtitles_from_templates(path, template_dict):
 
     result_dict = template_dict
     path = Path(path)
-    for child in dir.iterdir():
+    for child in path.iterdir():
         if child.is_dir():
             result_dict.update(get_subtitles_from_templates(child, template_dict))
         else:
@@ -118,7 +121,7 @@ def get_audio_from_templates(path, template_dict):
 
     result_dict = template_dict
     path = Path(path)
-    for child in dir.iterdir():
+    for child in path.iterdir():
         if child.is_dir():
             result_dict.update(get_audio_from_templates(child, template_dict))
         else:
@@ -147,7 +150,7 @@ def get_all_font_list(path):
 
     path = Path(path)
     result_dict = {}
-    for child in dir.iterdir():
+    for child in path.iterdir():
         if child.is_dir():
             result_dict.update(get_all_font_list(child))
         else:
