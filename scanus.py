@@ -68,13 +68,18 @@ def detect_subtitle_lang(subtitle_path):
     return language.part2t
 
 
-def get_subtitles_from_templates(path, template_dict):
-    """Scans all files in a folder and subfolders for subtitles file and adds information about subtitles to each template_dict entry.
+def get_attachments_from_templates(path, template_dict):
+    """ Scans all files in a folder and subfolders for audio or subtitle file and adds information about it to each template_dict entry.
         
     Keyword arguments:
     path -- path to anime release
     template_dict -- template dict from get_name_templates()
-    font_dict -- dictionary of fonts located at path
+
+    Audio list entity content:
+    path -- path to audio file
+    name -- audio label
+    lang -- audio language label ISO 639-2t format
+    dispose -- mkv audio flag
 
     Subtitle list entity content:
     path -- path to subtitle file
@@ -87,9 +92,24 @@ def get_subtitles_from_templates(path, template_dict):
     path = Path(path)
     for child in path.iterdir():
         if child.is_dir():
-            result_dict.update(get_subtitles_from_templates(child, template_dict))
+            result_dict.update(get_attachments_from_templates(child, template_dict))
         else:
-            if child.suffix.lower() in subtitles_files_extensions:
+            #audio files section
+            if child.suffix.lower() in audio_files_extensions:
+                if child.stem in result_dict:
+                    if (Path(str(child) + "/..").resolve().stem) == child.stem:
+                        audio_label = ""
+                    else:
+                        audio_label = Path(str(child) + "/..").resolve().stem
+                    audio_entity = [
+                        str(child),
+                        audio_label,
+                        "",
+                        0,
+                    ]
+                    result_dict[child.stem][2].append(audio_entity)
+            #subtitle files section
+            elif child.suffix.lower() in subtitles_files_extensions:
                 parent_dir_name = Path(str(child) + "/..").resolve().stem
                 # nested check
                 unnested_name = Path(
@@ -104,42 +124,6 @@ def get_subtitles_from_templates(path, template_dict):
                         0,
                     ]
                     result_dict[unnested_name][1].append(subtitle_entity)
-    return result_dict
-
-
-def get_audio_from_templates(path, template_dict):
-    """ Scans all files in a folder and subfolders for audio file and adds information about audio to each template_dict entry.
-        
-    Keyword arguments:
-    path -- path to anime release
-    template_dict -- template dict from get_name_templates()
-
-    Audio list entity content:
-    path -- path to audio file
-    name -- audio label
-    lang -- audio language label ISO 639(alpha3)
-    dispose -- mkv audio flag
-    """
-
-    result_dict = template_dict
-    path = Path(path)
-    for child in path.iterdir():
-        if child.is_dir():
-            result_dict.update(get_audio_from_templates(child, template_dict))
-        else:
-            if child.suffix.lower() in audio_files_extensions:
-                if child.stem in result_dict:
-                    if (Path(str(child) + "/..").resolve().stem) == child.stem:
-                        audio_label = ""
-                    else:
-                        audio_label = Path(str(child) + "/..").resolve().stem
-                    audio_entity = [
-                        str(child),
-                        audio_label,
-                        "rus",
-                        0,
-                    ]
-                    result_dict[child.stem][2].append(audio_entity)
     return result_dict
 
 
@@ -178,8 +162,7 @@ def scan_directory(path):
     """
     font_list = list(get_all_font_list(path).values())
     result_dict = get_name_templates(path)
-    result_dict = get_subtitles_from_templates(path, result_dict)
-    result_dict = get_audio_from_templates(path, result_dict)
+    result_dict = get_attachments_from_templates(path, result_dict)
     for i in result_dict:
         result_dict[i][3] = font_list
     return result_dict
@@ -187,3 +170,4 @@ def scan_directory(path):
 
 if __name__ == "__main__":
     print("Scanus isn't executable module")
+
