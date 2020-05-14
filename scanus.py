@@ -146,11 +146,11 @@ def get_all_font_list(path):
     return result_dict
 
 
-def scan_directory(path = None):
+def scan_directory(path):
     """Scans all files in a folder and subfolders end return dict.
 
     Keyword arguments:
-    path -- path to anime release, current folder if not used
+    path -- path to anime release
 
     dict content:
     key -- video file name without extention
@@ -160,8 +160,6 @@ def scan_directory(path = None):
         * audio list
         * font list
     """
-    if path is None:
-        path = Path.cwd()
     font_list = list(get_all_font_list(path).values())
     result_dict = get_name_templates(path)
     result_dict = get_attachments_from_templates(path, result_dict)
