@@ -1,4 +1,4 @@
-ass==0.5.0
-langdetect==1.0.8
-iso-639==0.4.5
-pysrt==1.1.2
+ass>=0.5.0
+langdetect>=1.0.8
+iso-639>=0.4.5
+pysrt>=1.1.2
