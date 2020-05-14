@@ -113,7 +113,7 @@ def get_attachments_from_templates(path, template_dict):
                 parent_dir_name = Path(str(child) + "/..").resolve().stem
                 # nested check
                 unnested_name = Path(
-                    re.sub(r"\." + parent_dir_name, "", child.name)
+                    re.sub(r"\." + re.escape(parent_dir_name), "", child.name)
                 ).stem
                 if unnested_name in result_dict:
                     subtitle_label = parent_dir_name
