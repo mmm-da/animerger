@@ -1,4 +1,4 @@
-# Scanus
+# Animerger
  
 ![CodeFactor Grade](https://img.shields.io/codefactor/grade/github/spam25/animerger-scanus?style=flat-square)
 ![Requires.io](https://img.shields.io/requires/github/spAm25/animerger-scanus?style=flat-square)
