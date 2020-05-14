@@ -94,7 +94,7 @@ def get_attachments_from_templates(path, template_dict):
         if child.is_dir():
             result_dict.update(get_attachments_from_templates(child, template_dict))
         else:
-            #audio files section
+            # audio files section
             if child.suffix.lower() in audio_files_extensions:
                 if child.stem in result_dict:
                     if (Path(str(child) + "/..").resolve().stem) == child.stem:
@@ -108,7 +108,7 @@ def get_attachments_from_templates(path, template_dict):
                         0,
                     ]
                     result_dict[child.stem][2].append(audio_entity)
-            #subtitle files section
+            # subtitle files section
             elif child.suffix.lower() in subtitles_files_extensions:
                 parent_dir_name = Path(str(child) + "/..").resolve().stem
                 # nested check
@@ -170,4 +170,3 @@ def scan_directory(path):
 
 if __name__ == "__main__":
     print("Scanus isn't executable module")
-
