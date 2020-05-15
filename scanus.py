@@ -56,14 +56,15 @@ def _detect_subtitle_lang(subtitle_path):
     """
     subtitle_text = ""
     encoding = _detect_codepage(subtitle_path)
-
-    subs = pysubs2.load(subtitle_path, encoding=encoding)
-    for line in subs:
-        subtitle_text += line.text
-    lang_alpha2 = detect(subtitle_text)
-    language = languages.get(part1=lang_alpha2)
-    return language.part2t
-
+    try:
+        subs = pysubs2.load(subtitle_path, encoding=encoding)
+        for line in subs:
+            subtitle_text += line.text
+        lang_alpha2 = detect(subtitle_text)
+        language = languages.get(part1=lang_alpha2)
+        return language.part2t
+    except UnicodeDecodeError:
+        return ''
 
 def _get_attachments_from_templates(path, template_dict):
     """ Scans all files in a folder and subfolders for audio or subtitle file and adds information about it to each template_dict entry.
