@@ -1,6 +1,6 @@
-import ass
 import re
-import pysrt
+import pysubs2
+import chardet
 from iso639 import languages
 from langdetect import detect
 from pathlib import Path
@@ -11,7 +11,7 @@ subtitles_files_extensions = [".srt", ".ass", ".ssa"]
 attach_font_extensions = [".ttf", ".otf"]
 
 
-def get_name_templates(path):
+def _get_name_templates(path):
     """Scans all files in a folder and subfolders for video files returns a template dict.
         
     Keyword arguments:
@@ -31,44 +31,39 @@ def get_name_templates(path):
     path = Path(path)
     for child in path.iterdir():
         if child.is_dir():
-            result_dict.update(get_name_templates(child))
+            result_dict.update(_get_name_templates(child))
         else:
             if child.suffix.lower() in video_files_extensions:
                 result_dict[child.stem] = [str(child), [], [], []]
     return result_dict
 
+def _detect_codepage(path):
+    """Return string with codepage
 
-def detect_subtitle_lang(subtitle_path):
+    Keyword arguments:
+    subtitle_path -- path to subtitle file
+    """
+    with open(path,'rb') as file:
+        return chardet.detect(file.read())['encoding']
+
+def _detect_subtitle_lang(subtitle_path):
     """Return subtitle language label in ISO 639-2t format.
 
     Keyword arguments:
     subtitle_path -- path to subtitle file
     """
     subtitle_text = ""
-    if subtitle_path.suffix in [".ass", ".ssa"]:
-        with open(str(subtitle_path), encoding="utf_8_sig") as file:
-            sub = ass.parse(file)
-            for i in sub.events:
-                subtitle_text += re.sub(r"{.*}", "", i.text)
-    elif subtitle_path.suffix == ".srt":
-        try:
-            sub = pysrt.open(str(subtitle_path))
-        except UnicodeDecodeError:
-            sub = pysrt.open(str(subtitle_path), encoding="cp1251")
-        else:
-            # detect not possible
-            return ""
-        for i in sub:
-            subtitle_text += i.text
-    else:
-        # detect not possible
-        return ""
-    alpha2 = detect(subtitle_text)
-    language = languages.get(part1=alpha2)
+    encoding = _detect_codepage(subtitle_path)
+    
+    subs = pysubs2.load(subtitle_path,encoding = encoding)    
+    for line in subs:
+        subtitle_text += line.text
+    lang_alpha2 = detect(subtitle_text)
+    language = languages.get(part1=lang_alpha2)
     return language.part2t
 
 
-def get_attachments_from_templates(path, template_dict):
+def _get_attachments_from_templates(path, template_dict):
     """ Scans all files in a folder and subfolders for audio or subtitle file and adds information about it to each template_dict entry.
         
     Keyword arguments:
@@ -92,7 +87,7 @@ def get_attachments_from_templates(path, template_dict):
     path = Path(path)
     for child in path.iterdir():
         if child.is_dir():
-            result_dict.update(get_attachments_from_templates(child, template_dict))
+            result_dict.update(_get_attachments_from_templates(child, template_dict))
         else:
             # audio files section
             if child.suffix.lower() in audio_files_extensions:
@@ -120,14 +115,14 @@ def get_attachments_from_templates(path, template_dict):
                     subtitle_entity = [
                         str(child),
                         subtitle_label,
-                        detect_subtitle_lang(child),
+                        _detect_subtitle_lang(child),
                         0,
                     ]
                     result_dict[unnested_name][1].append(subtitle_entity)
     return result_dict
 
 
-def get_all_font_list(path):
+def _get_all_font_list(path):
     """Scans all files in a folder and subfolders for font files return list of path to fonts.
     
     Keyword arguments:
@@ -138,7 +133,7 @@ def get_all_font_list(path):
     result_dict = {}
     for child in path.iterdir():
         if child.is_dir():
-            result_dict.update(get_all_font_list(child))
+            result_dict.update(_get_all_font_list(child))
         else:
             if child.suffix.lower() in attach_font_extensions:
                 if not (child.name in result_dict):
@@ -162,13 +157,14 @@ def scan_directory(path = None):
     """
     if path is None:
         path = Path.cwd()
-    font_list = list(get_all_font_list(path).values())
-    result_dict = get_name_templates(path)
-    result_dict = get_attachments_from_templates(path, result_dict)
+    font_list = list(_get_all_font_list(path).values())
+    result_dict = _get_name_templates(path)
+    result_dict = _get_attachments_from_templates(path, result_dict)
     for i in result_dict:
         result_dict[i][3] = font_list
     return result_dict
 
 
 if __name__ == "__main__":
+    print(scan_directory('G:\Darker than Black 2 [BD-HDHWP]'))
     print("Scanus isn't executable module")
