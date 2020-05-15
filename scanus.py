@@ -5,8 +5,8 @@ from iso639 import languages
 from langdetect import detect
 from pathlib import Path
 
-video_files_extensions = [".mkv", ".mp4", "avi"]
-audio_files_extensions = [".mka", ".aac", ".mp3"]
+video_files_extensions = [".mkv", ".mp4", ".avi"]
+audio_files_extensions = [".mka", ".aac", ".mp3", ".ac3"]
 subtitles_files_extensions = [".srt", ".ass", ".ssa"]
 attach_font_extensions = [".ttf", ".otf"]
 
