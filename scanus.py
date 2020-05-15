@@ -5,8 +5,8 @@ from iso639 import languages
 from langdetect import detect
 from pathlib import Path
 
-video_files_extensions = [".mkv", ".mp4", "avi"]
-audio_files_extensions = [".mka", ".aac", ".mp3"]
+video_files_extensions = [".mkv", ".mp4", ".avi"]
+audio_files_extensions = [".mka", ".aac", ".mp3", ".ac3"]
 subtitles_files_extensions = [".srt", ".ass", ".ssa"]
 attach_font_extensions = [".ttf", ".otf"]
 
@@ -37,14 +37,16 @@ def _get_name_templates(path):
                 result_dict[child.stem] = [str(child), [], [], []]
     return result_dict
 
+
 def _detect_codepage(path):
     """Return string with codepage
 
     Keyword arguments:
     subtitle_path -- path to subtitle file
     """
-    with open(path,'rb') as file:
-        return chardet.detect(file.read())['encoding']
+    with open(path, "rb") as file:
+        return chardet.detect(file.read())["encoding"]
+
 
 def _detect_subtitle_lang(subtitle_path):
     """Return subtitle language label in ISO 639-2t format.
@@ -54,8 +56,8 @@ def _detect_subtitle_lang(subtitle_path):
     """
     subtitle_text = ""
     encoding = _detect_codepage(subtitle_path)
-    
-    subs = pysubs2.load(subtitle_path,encoding = encoding)    
+
+    subs = pysubs2.load(subtitle_path, encoding=encoding)
     for line in subs:
         subtitle_text += line.text
     lang_alpha2 = detect(subtitle_text)
@@ -141,7 +143,7 @@ def _get_all_font_list(path):
     return result_dict
 
 
-def scan_directory(path = None):
+def scan_directory(path=None):
     """Scans all files in a folder and subfolders end return dict.
 
     Keyword arguments:
@@ -166,5 +168,4 @@ def scan_directory(path = None):
 
 
 if __name__ == "__main__":
-    print(scan_directory('G:\Darker than Black 2 [BD-HDHWP]'))
     print("Scanus isn't executable module")
