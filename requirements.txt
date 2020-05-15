@@ -1,4 +1,4 @@
 pysubs2>=0.2.4
 langdetect>=1.0.8
 iso-639>=0.4.5
-сhardet>=3.0.4
+chardet>=3.0.4
