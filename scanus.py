@@ -4,11 +4,7 @@ import chardet
 from iso639 import languages
 from langdetect import detect
 from pathlib import Path
-
-video_files_extensions = [".mkv", ".mp4", ".avi"]
-audio_files_extensions = [".mka", ".aac", ".mp3", ".ac3"]
-subtitles_files_extensions = [".srt", ".ass", ".ssa"]
-attach_font_extensions = [".ttf", ".otf"]
+from file_extentions import fonts_extensions, video_extensions, audio_extensions
 
 
 def _get_name_templates(path):
@@ -33,7 +29,7 @@ def _get_name_templates(path):
         if child.is_dir():
             result_dict.update(_get_name_templates(child))
         else:
-            if child.suffix.lower() in video_files_extensions:
+            if child.suffix.lower() in video_extensions:
                 result_dict[child.stem] = [str(child), [], [], []]
     return result_dict
 
@@ -64,7 +60,8 @@ def _detect_subtitle_lang(subtitle_path):
         language = languages.get(part1=lang_alpha2)
         return language.part2t
     except UnicodeDecodeError:
-        return ''
+        return ""
+
 
 def _get_attachments_from_templates(path, template_dict):
     """ Scans all files in a folder and subfolders for audio or subtitle file and adds information about it to each template_dict entry.
@@ -93,7 +90,7 @@ def _get_attachments_from_templates(path, template_dict):
             result_dict.update(_get_attachments_from_templates(child, template_dict))
         else:
             # audio files section
-            if child.suffix.lower() in audio_files_extensions:
+            if child.suffix.lower() in audio_extensions:
                 if child.stem in result_dict:
                     if (Path(str(child) + "/..").resolve().stem) == child.stem:
                         audio_label = ""
@@ -107,7 +104,7 @@ def _get_attachments_from_templates(path, template_dict):
                     ]
                     result_dict[child.stem][2].append(audio_entity)
             # subtitle files section
-            elif child.suffix.lower() in subtitles_files_extensions:
+            elif child.suffix.lower() in subtitles_extensions:
                 parent_dir_name = Path(str(child) + "/..").resolve().stem
                 # nested check
                 unnested_name = Path(
@@ -138,7 +135,7 @@ def _get_all_font_list(path):
         if child.is_dir():
             result_dict.update(_get_all_font_list(child))
         else:
-            if child.suffix.lower() in attach_font_extensions:
+            if child.suffix.lower() in fonts_extensions:
                 if not (child.name in result_dict):
                     result_dict[child.name] = str(child)
     return result_dict
