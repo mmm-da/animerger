@@ -34,7 +34,7 @@ class Container:
         stream = {"name": name, "language": lang, "path": path}
 
         if disposition is not None:
-            stream["disposition":disposition]
+            stream["disposition"] = disposition
         else:
             stream["disposition"] = {
                 "attached_pic": 0,
