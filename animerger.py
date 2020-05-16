@@ -20,16 +20,16 @@ class Container:
             self.fonts.append(path)
             return
 
-        if name is None:
+        if lang is None or lang == '':
+            lang = "und"
+        else:
+            name = languages.get(part2t=lang).name
+
+        if name is None or name == '':
             if lang is None:
                 name = "Undefined language"
             else:
-                name = languages.get(part3=lang).name + " language"
-
-        if lang is None:
-            lang = "Undefined"
-        else:
-            name = languages.get(part3=lang).name
+                name = languages.get(part2t=lang).name + " language"
 
         stream = {"name": name, "language": lang, "path": path}
 
@@ -61,13 +61,14 @@ class Container:
         container = probe(path)
         for stream in container["streams"]:
             stream_properties = {}
-            tags = stream["tags"]
-            for field in tags:
-                stream_properties[field] = tags[field]
+            if "tags" in stream:
+                tags = stream["tags"]
+                for field in tags:
+                    stream_properties[field] = tags[field]
             if "language" not in stream_properties:
-                stream_properties["language"] = "Undefined"
+                stream_properties["language"] = "und"
             if "name" not in stream_properties:
-                stream_properties["name"] = languages.get(part3=stream_properties["language"]).name + " language"
+                stream_properties["name"] = languages.get(part2t=stream_properties["language"]).name + " language"
             stream_properties["disposition"] = stream["disposition"]
             stream_properties["path"] = "container"
             if stream["codec_type"] == "audio":
@@ -94,18 +95,23 @@ class Container:
         cmd = "ffmpeg"
         current_stream = 0
 
+        containers_nb = 0
         # We should attach all containers
         for cont in self.containers:
             cmd += ' -i "{}"'.format(cont)
+            containers_nb += 1
         for stream in self.video:
             if stream["path"] != 'container':
                 cmd += ' -i "{}"'.format(stream["path"])
+                containers_nb += 1
         for stream in self.audio:
             if stream["path"] != 'container':
                 cmd += ' -i "{}"'.format(stream["path"])
+                containers_nb += 1
         for stream in self.subtitles:
             if stream["path"] != 'container':
                 cmd += ' -i "{}"'.format(stream["path"])
+                containers_nb += 1
 
         for stream in self.video:
             # TODO: Handle disposition field
@@ -131,6 +137,10 @@ class Container:
         
         # Don't touch audio/video codec
         cmd += " -c:v copy -c:a copy"
+
+        # Map ALL inputs to output
+        for input_file in range(containers_nb):
+            cmd += " -map {}".format(input_file)
 
         cmd += ' "{}.mkv"'.format(self.name)
 
