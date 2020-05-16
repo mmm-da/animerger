@@ -1,11 +1,11 @@
 import os
 import subprocess
+
 from iso639 import languages
 from ffmpeg import probe
 
 
 class Container:
-
     def __init__(self):
         super().__init__()
         self.audio = []
@@ -20,12 +20,12 @@ class Container:
             self.fonts.append(path)
             return
 
-        if lang is None or lang == '':
+        if lang is None or lang == "":
             lang = "und"
         else:
             name = languages.get(part2t=lang).name
 
-        if name is None or name == '':
+        if name is None or name == "":
             if lang is None:
                 name = "Undefined language"
             else:
@@ -68,7 +68,10 @@ class Container:
             if "language" not in stream_properties:
                 stream_properties["language"] = "und"
             if "name" not in stream_properties:
-                stream_properties["name"] = languages.get(part2t=stream_properties["language"]).name + " language"
+                stream_properties["name"] = (
+                    languages.get(part2t=stream_properties["language"]).name
+                    + " language"
+                )
             stream_properties["disposition"] = stream["disposition"]
             stream_properties["path"] = "container"
             if stream["codec_type"] == "audio":
@@ -101,40 +104,48 @@ class Container:
             cmd += ' -i "{}"'.format(cont)
             containers_nb += 1
         for stream in self.video:
-            if stream["path"] != 'container':
+            if stream["path"] != "container":
                 cmd += ' -i "{}"'.format(stream["path"])
                 containers_nb += 1
         for stream in self.audio:
-            if stream["path"] != 'container':
+            if stream["path"] != "container":
                 cmd += ' -i "{}"'.format(stream["path"])
                 containers_nb += 1
         for stream in self.subtitles:
-            if stream["path"] != 'container':
+            if stream["path"] != "container":
                 cmd += ' -i "{}"'.format(stream["path"])
                 containers_nb += 1
 
         for stream in self.video:
             # TODO: Handle disposition field
             # TODO: don't assume anything about stream number
-            cmd += " -metadata:s:{} language={}".format(current_stream, stream["language"])
+            cmd += " -metadata:s:{} language={}".format(
+                current_stream, stream["language"]
+            )
             current_stream += 1
-        
+
         for stream in self.audio:
             # TODO: Handle disposition field
             # TODO: don't assume anything about stream number
-            cmd += " -metadata:s:{} language={}".format(current_stream, stream["language"])
+            cmd += " -metadata:s:{} language={}".format(
+                current_stream, stream["language"]
+            )
             current_stream += 1
 
         for stream in self.subtitles:
             # TODO: Handle disposition field
             # TODO: don't assume anything about stream number
-            cmd += " -metadata:s:{} language={}".format(current_stream, stream["language"])
+            cmd += " -metadata:s:{} language={}".format(
+                current_stream, stream["language"]
+            )
             current_stream += 1
-        
+
         for font in self.fonts:
-            cmd += ' -attach "{}" -metadata:s:{} mimetype=application/x-truetype-font'.format(font, current_stream)
+            cmd += ' -attach "{}" -metadata:s:{} mimetype=application/x-truetype-font'.format(
+                font, current_stream
+            )
             current_stream += 1
-        
+
         # Don't touch audio/video codec
         cmd += " -c:v copy -c:a copy"
 
@@ -148,7 +159,12 @@ class Container:
 
     def show_streams(self):
         from pprint import pprint
+
         pprint(self.audio)
         pprint(self.video)
         pprint(self.subtitles)
         pprint(self.fonts)
+
+
+if __name__ == "__main__":
+    print("Argument isn't executable module, but in Ka-52 you can start it.")
