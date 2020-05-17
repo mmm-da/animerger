@@ -50,16 +50,11 @@ class Scanus:
             for child in path.iterdir():
                 if child.is_dir():
                     _scan_directory(child)
-                elif child.suffix.lower() in audio_extensions:
-                    if child.stem in self._container_dict:
-                        self._container_dict[child.stem].append(str(child))
-                elif child.suffix.lower() in subtitles_extensions:
-                    parent_dir_name = Path(str(child) + "/..").resolve().stem
-                    real_name = Path(
-                        re.sub(r"\." + re.escape(parent_dir_name), "", child.name)
-                    ).stem
-                    if real_name in self._container_dict:
-                        self._container_dict[real_name].append(str(child))
+                elif child.suffix.lower() in (audio_extensions + subtitles_extensions):
+                    for template in self._container_dict:
+                        template_regex = re.escape(template)
+                        if re.match(template_regex,child.name) != None:
+                            self._container_dict[template].append(str(child))
                 elif child.suffix.lower() in fonts_extensions:
                     self._font_dict[child.name] = str(child)
         
@@ -233,8 +228,8 @@ def scan_directory(path=None):
 if __name__ == "__main__":
     print("Scanus isn't executable module")
     
-    #scanner = Scanus()
-    #scanner.search_sp = True
-    #scanner.scan_directory('G:\[Kawaiika-Raws] (2018) Non Non Biyori Vacation [BDRip 1920x1080 HEVC FLAC]') 
-    #pprint.pprint(scanner.get_container_list(),width=200)
-    #pprint.pprint(scanner.get_font_list())
+    scanner = Scanus()
+    scanner.search_sp = True
+    scanner.scan_directory('G:\[Kawaiika-Raws] (2018) Non Non Biyori Vacation [BDRip 1920x1080 HEVC FLAC]') 
+    pprint.pprint(scanner.get_container_list(),width=200)
+    pprint.pprint(scanner.get_font_list())
