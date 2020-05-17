@@ -39,5 +39,5 @@ def unpack_all_archives(path, temp_path):
 
 if __name__ == "__main__":
     print(
-        "It's not like I'm trying to say you that Pre Parade isn't executable module! B-Baka!"
+        "I-It's not like I'm trying to say you that Pre Parade isn't executable module! B-Baka!"
     )
