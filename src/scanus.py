@@ -227,9 +227,3 @@ def scan_directory(path=None):
 
 if __name__ == "__main__":
     print("Scanus isn't executable module")
-    
-    scanner = Scanus()
-    scanner.search_sp = True
-    scanner.scan_directory('G:\[Kawaiika-Raws] (2018) Non Non Biyori Vacation [BDRip 1920x1080 HEVC FLAC]') 
-    pprint.pprint(scanner.get_container_list(),width=200)
-    pprint.pprint(scanner.get_font_list())
