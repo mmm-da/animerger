@@ -1,4 +1,6 @@
-pysubs2>=0.2.4
-langdetect>=1.0.8
-iso-639>=0.4.5
-chardet>=3.0.4
+pyunpack>=0.2.1         # preparade
+pysubs2>=0.2.4          # scanus
+langdetect>=1.0.8       # scanus
+chardet>=3.0.4          # scanus
+iso-639>=0.4.5          # scanus
+ffmpeg-python >= 0.2.0  # argument

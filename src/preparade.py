@@ -1,13 +1,15 @@
 import shutil
-from os import mkdir
+from os import mkdir,getpid
 from pathlib import Path
-from random import randint
+
 from pyunpack import Archive
+
 from file_extentions import archive_extensions
+
 
 class TempDir:
     def __init__(self, path):
-        self._path = Path(path + r"/" + ".animerger-" + str(randint(1000, 9999)))
+        self._path = Path(path + r"/" + ".animerger-" + str(getpid()))
         mkdir(self._path)
         print(self._path)
 
@@ -17,6 +19,7 @@ class TempDir:
 
     def __del__(self):
         shutil.rmtree(self.path)
+
 
 def unpack_all_archives(path, temp_path):
     """Unpacks all archives in folder and subfolders from path into temp_path
@@ -32,3 +35,9 @@ def unpack_all_archives(path, temp_path):
         elif i.suffix.lower() in archive_extensions:
             archive = Archive(str(i))
             archive.extractall(temp_path)
+
+
+if __name__ == "__main__":
+    print(
+        "I-It's not like I'm trying to say you that Pre Parade isn't executable module! B-Baka!"
+    )

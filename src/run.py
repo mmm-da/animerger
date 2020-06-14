@@ -2,7 +2,7 @@ from pprint import pprint
 
 import subprocess
 
-import animerger
+import argument
 import scanus
 
 search_path = input("Where should i search files? ")
@@ -16,7 +16,7 @@ for episode_name in directory:
     print("Working with {}".format(episode_name))
     # choice = input("Should i add this? [y]/n ")
     episode = directory[episode_name]
-    container = animerger.Container()
+    container = argument.Container()
     container.add_container(episode[0])  # mkv file
     if episode[1]:
         for audio in episode[1]:
