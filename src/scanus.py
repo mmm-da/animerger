@@ -16,6 +16,7 @@ from file_extentions import (
 
 
 class Scanus:
+
     def __init__(self):
         super().__init__()
         self._search_sp = False
@@ -41,7 +42,10 @@ class Scanus:
                 self._container_dict[child.stem] = [str(child)]
 
     def scan_directory(self,dir_path):
-        # search all containers
+        """ Search all containers (video, audio, subtitles, fonts) in dir_path
+
+    
+        """
         dir_path = Path(dir_path)
         self._container_dict = {}
         self._font_dict = {}
