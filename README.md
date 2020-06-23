@@ -1,7 +1,7 @@
 # Animerger
  
 ![CodeFactor Grade](https://img.shields.io/codefactor/grade/github/spam25/animerger?style=flat-square)
-![Requires.io](https://img.shields.io/requires/github/spAm25/animerger-scanus?style=flat-square)
+[![Requirements Status](https://requires.io/github/spAm25/animerger/requirements.svg?branch=master)](https://requires.io/github/spAm25/animerger/requirements/?branch=master)
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/spAm25/animerger-scanus?style=flat-square)
 ![GitHub](https://img.shields.io/github/license/spAm25/animerger-scanus?style=flat-square)
 
