@@ -1,14 +1,12 @@
-from pprint import pprint
-
 import subprocess
 
-import argument
-import scanus
+from .argument import *
+from .scanus import Scanus
 
 search_path = input("Where should i search files? ")
 save_path = input("Where should i save files? ")
 
-directory = scanus.scan_directory(search_path)
+directory = Scanus.scan_directory(search_path)
 
 curr_episode = 1
 
@@ -16,7 +14,7 @@ for episode_name in directory:
     print("Working with {}".format(episode_name))
     # choice = input("Should i add this? [y]/n ")
     episode = directory[episode_name]
-    container = argument.Container()
+    container = Container()
     container.add_container(episode[0])  # mkv file
     if episode[1]:
         for audio in episode[1]:

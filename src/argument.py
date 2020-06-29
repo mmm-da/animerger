@@ -1,6 +1,3 @@
-import os
-import subprocess
-
 from iso639 import languages
 from ffmpeg import probe
 

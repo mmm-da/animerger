@@ -1,5 +1,10 @@
+# -*- coding: utf-8 -*-
+"""This module provides a class that scans a folder for any containers
+(assuming container is video/audio/subtitle file or font).
+
+Possible file extensions are listed in file_extensions module.
+"""
 import re
-import pprint
 from pathlib import Path
 
 import chardet
@@ -7,7 +12,7 @@ import pysubs2
 from iso639 import languages
 from langdetect import detect
 
-from file_extentions import (
+from .settings import (
     audio_extensions,
     fonts_extensions,
     subtitles_extensions,
@@ -41,7 +46,7 @@ class Scanus:
             elif child.suffix.lower() in video_extensions:
                 self._container_dict[child.stem] = [str(child)]
 
-    def scan_directory(self,dir_path):
+    def scan_directory(self, dir_path):
         """ Search all containers (video, audio, subtitles, fonts) in dir_path
 
     
@@ -57,7 +62,7 @@ class Scanus:
                 elif child.suffix.lower() in (audio_extensions + subtitles_extensions):
                     for template in self._container_dict:
                         template_regex = re.escape(template)
-                        if re.match(template_regex,child.name) != None:
+                        if re.match(template_regex, child.name) is not None:
                             self._container_dict[template].append(str(child))
                 elif child.suffix.lower() in fonts_extensions:
                     self._font_dict[child.name] = str(child)
@@ -70,6 +75,7 @@ class Scanus:
 
     def get_font_list(self):
         return list(self._font_dict.values())
+
 
 def _detect_codepage(path):
     """Return string with codepage
@@ -98,6 +104,7 @@ def _detect_subtitle_lang(subtitle_path):
         return language.part2t
     except UnicodeDecodeError:
         return ""
+
 
 if __name__ == "__main__":
     print("Scanus isn't executable module")
