@@ -14,8 +14,36 @@ class Container:
         return ""
 
 class Stream:
-    def __init__(self,path):
+    """This class represents a Stream, which is a _media_ file (not a font or something)"""
+    
+    def __init__(self, path, id, **kwargs):
         self.__path = path
+        self.__id = id
+        # Set attributes of stream
+        default_attr = dict(lang=None, default=None, forced=None)
+        allowed_attr = default_attr.keys()
+        default_attr.update(kwargs)
+        self.__dict__.update((k,v) for k,v in default_attr.items() if k in allowed_attr)
+
+    @property
+    def path(self):
+        return self.__path
+
+    @property
+    def id(self):
+        return self.__id
+    
+class SubtitleStream(Stream):
+    """Differs from _Stream_ in a field required_fonts"""
+
+    def __init__(self, path, id, *kwargs):
+        super().__init__(path, id, *kwargs)
+        # todo: parse file and get required fonts
+        self.__required_fonts = []
+
+    @property
+    def required_fonts(self):
+        return __required_fonts
 
 class Attach:
     def __init__(self,path):
