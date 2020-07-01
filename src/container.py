@@ -1,4 +1,3 @@
-# найти потеряную либу для шрифтов
 
 from fontTools import ttLib
 
@@ -48,7 +47,7 @@ class SubtitleStream(Stream):
 
     @property
     def required_fonts(self):
-        return __required_fonts
+        return self.__required_fonts
 
 class Attach:
     def __init__(self,path):
