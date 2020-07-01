@@ -1,5 +1,6 @@
 from fontTools import ttLib
 from ffmpeg import probe
+import settings
 
 
 class FFMpegConf:
@@ -8,7 +9,7 @@ class FFMpegConf:
 
 
 class Container:
-    def __init__(self, path, attachments=[]):
+    def __init__(self, path: str, attachments=[]):
         self.__path = path
         self.__stream_list = []
         ffmpeg_probe = probe(path)
@@ -26,7 +27,7 @@ class Container:
                 stream_instance = VideoStream(stream_id, stream_attributes)
             elif codec_type == 'subtitle':
                 # Pass subtitle file path only if they aren't embedded
-                if ffmpeg_probe['nb_streams'] == 1:
+                if path.rpartition[-1] in settings.subtitles_extensions:
                     subtitle_path = path
                 else:
                     subtitle_path = None
@@ -45,14 +46,14 @@ class Container:
 
 class Stream:
     """This class represents a Stream, which is a _media_ file (not a font or something)"""
-    
-    def __init__(self, stream_id, attributes={}):
+
+    def __init__(self, stream_id: int, attributes: dict = {}):
         self.__stream_id = stream_id
         # Set attributes of stream
         default_attr = dict(lang=None, default=None, forced=None)
         allowed_attr = default_attr.keys()
         default_attr.update(attributes)
-        self.__dict__.update((k,v) for k,v in default_attr.items() if k in allowed_attr)
+        self.__dict__.update((k, v) for k, v in default_attr.items() if k in allowed_attr)
 
     @property
     def stream_id(self):
@@ -62,7 +63,7 @@ class Stream:
 class SubtitleStream(Stream):
     """Differs from _Stream_ in a field required_fonts"""
 
-    def __init__(self, stream_id, path=None, attributes={}):
+    def __init__(self, stream_id: int, path: str = None, attributes: dict = {}):
         super().__init__(stream_id, attributes)
         self.__path = path
         # todo: parse file and get required fonts
@@ -75,26 +76,26 @@ class SubtitleStream(Stream):
 
 class VideoStream(Stream):
 
-    def __init__(self, stream_id, attributes={}):
+    def __init__(self, stream_id: int, attributes: dict = {}):
         super().__init__(stream_id, attributes)
 
 
 class AudioStream(Stream):
 
-    def __init__(self, stream_id, attributes={}):
+    def __init__(self, stream_id: int, attributes: dict = {}):
         super().__init__(stream_id, attributes)
 
 
 class Attach:
-    def __init__(self, path):
-        self.__path = path 
+    def __init__(self, path: str):
+        self.__path = path
 
     @property
     def path(self):
         return self.__path
 
 
-class FontAttach(Attach): 
+class FontAttach(Attach):
     def __init__(self, path):
         super().__init__(path)
         self.__font_names = []
