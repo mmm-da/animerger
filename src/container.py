@@ -1,4 +1,3 @@
-
 from ffmpeg import probe
 import chardet
 import pysubs2
@@ -7,6 +6,8 @@ import iso639
 from fontTools import ttLib
 
 import settings
+
+# We can convert TTC to TTF files with https://github.com/yhchen/ttc2ttf
 
 
 class FFMpegConf:
@@ -33,7 +34,7 @@ class Container:
                 stream_instance = VideoStream(stream_id, stream_attributes)
             elif codec_type == 'subtitle':
                 # Pass subtitle file path only if they aren't embedded
-                if path.rpartition[-1] in settings.subtitles_extensions:
+                if path.rpartition('.')[-1] in settings.subtitles_extensions:
                     subtitle_path = path
                 else:
                     subtitle_path = None
@@ -108,6 +109,7 @@ class SubtitleStream(Stream):
             pass
         self.__required_fonts = list(dict.fromkeys(self.__required_fonts))
 
+
 class VideoStream(Stream):
 
     def __init__(self, stream_id: int, attributes: dict = {}):
@@ -120,7 +122,7 @@ class AudioStream(Stream):
         super().__init__(stream_id, attributes)
 
 
-class Attach:
+class Attachment:
     def __init__(self, path: str):
         self.__path = path
 
@@ -129,7 +131,7 @@ class Attach:
         return self.__path
 
 
-class FontAttach(Attach):
+class FontAttachment(Attachment):
     def __init__(self, path):
         super().__init__(path)
         self.__font_names = []
