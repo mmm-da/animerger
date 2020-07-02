@@ -1,5 +1,11 @@
-from fontTools import ttLib
+
 from ffmpeg import probe
+import chardet
+import pysubs2
+import langdetect
+import iso639
+from fontTools import ttLib
+
 import settings
 
 
@@ -31,7 +37,7 @@ class Container:
                     subtitle_path = path
                 else:
                     subtitle_path = None
-                stream_instance = VideoStream(stream_id, subtitle_path, stream_attributes)
+                stream_instance = SubtitleStream(stream_id, subtitle_path, stream_attributes)
             else:
                 stream_instance = Stream(stream_id, stream_attributes)
             self.__stream_list.append(stream_instance)
@@ -66,13 +72,41 @@ class SubtitleStream(Stream):
     def __init__(self, stream_id: int, path: str = None, attributes: dict = {}):
         super().__init__(stream_id, attributes)
         self.__path = path
-        # todo: parse file and get required fonts
         self.__required_fonts = []
+        self.__encoding = ""
+        """ Update subtitle specific metadata"""
+        self.__detect_codepage()
+        self.__detect_subtitle_lang()
+        self.__detect_required_fonts()
 
     @property
     def required_fonts(self):
         return self.__required_fonts
 
+    def __detect_subtitle_lang(self):
+        subtitle_text = ""
+        try:
+            subs = pysubs2.load(self.__path, encoding=self.__encoding)
+            for line in subs:
+                subtitle_text += line.text
+            lang_alpha2 = langdetect.detect(subtitle_text)
+            language = iso639.languages.get(part1=lang_alpha2)
+            self.lang = language.part2t
+        except UnicodeDecodeError:
+            self.lang = ""
+
+    def __detect_codepage(self):
+        with open(self.__path, "rb") as file:
+            self.__encoding = chardet.detect(file.read())["encoding"]
+    
+    def __detect_required_fonts(self):
+        try:
+            subs = pysubs2.load(self.__path, encoding=self.__encoding)
+            for line in subs:
+                self.__required_fonts.append(subs.styles[line.style].fontname)
+        except UnicodeDecodeError:
+            pass
+        self.__required_fonts = list(dict.fromkeys(self.__required_fonts))
 
 class VideoStream(Stream):
 
