@@ -16,8 +16,9 @@ class FFMpegConf:
 
 
 class Container:
-    def __init__(self, path: str, attachments=[]):
-        self.__path = path
+    def __init__(self, path: str = None, attachments=[]):
+        if path is None:
+            return
         self.__stream_list = []
         ffmpeg_probe = probe(path)
         for ffmpeg_stream in ffmpeg_probe['streams']:
@@ -48,7 +49,10 @@ class Container:
         return ""
 
     def join(self, other):
-        pass
+        new_container = Container()
+        new_container.__stream_list = self.__stream_list.extend(other.__stream_list)
+        new_container.__attach_list = self.__attach_list.extend(other.__attach_list)
+        return new_container
 
 
 class Stream:
@@ -85,6 +89,8 @@ class SubtitleStream(Stream):
         return self.__required_fonts
 
     def __detect_subtitle_lang(self):
+        if self.__path is None:
+            return
         subtitle_text = ""
         try:
             subs = pysubs2.load(self.__path, encoding=self.__encoding)
@@ -97,10 +103,14 @@ class SubtitleStream(Stream):
             self.lang = ""
 
     def __detect_codepage(self):
+        if self.__path is None:
+            return
         with open(self.__path, "rb") as file:
             self.__encoding = chardet.detect(file.read())["encoding"]
     
     def __detect_required_fonts(self):
+        if self.__path is None:
+            return
         try:
             subs = pysubs2.load(self.__path, encoding=self.__encoding)
             for line in subs:
@@ -142,6 +152,8 @@ class FontAttachment(Attachment):
         return self.__font_names
 
     def get_font_names(self):
+        if self.path is None:
+            return
         font = ttLib.TTFont(self.path)
         name = ""
         for record in font['name'].names:
