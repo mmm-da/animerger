@@ -38,6 +38,22 @@ class MetaContainer:
             print(str(stream))
         print("Attachments: ", self.__attach_list)
 
+    @property
+    def container_list(self):
+        return self.__container_list
+
+    @property
+    def stream_list(self):
+        return self.__stream_list
+
+    @property
+    def attach_list(self):
+        return self.__attach_list
+
+    @property
+    def missing_fonts(self):
+        return self.__missing_fonts
+
     def create_font_dict(self, attachments_paths: str):
         """ Create dict like {font_name:font_path}
 
