@@ -1,10 +1,10 @@
 import shutil
-from os import mkdir,getpid
+from os import mkdir, getpid
 from pathlib import Path
 
 from pyunpack import Archive
 
-from file_extentions import archive_extensions
+from .settings import archive_extensions
 
 
 class TempDir:
