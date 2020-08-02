@@ -25,7 +25,10 @@ class Scanus:
         self._search_sp = value
 
     def _search_templates(self, path):
-        # search all video containers
+        """ Search  video containers in path
+
+    
+        """
         dir_path = Path(path)
         for child in dir_path.iterdir():
             if child.is_dir():

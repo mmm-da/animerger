@@ -3,97 +3,163 @@ import chardet
 import pysubs2
 import langdetect
 import iso639
+import enum
+
 from fontTools import ttLib
 
 import settings
 
 # We can convert TTC to TTF files with https://github.com/yhchen/ttc2ttf
 
+class StreamTypes(enum.IntEnum):
+    VIDEO = 0
+    AUDIO = 1
+    SUBTITLE = 2
 
-class FFMpegConf:
-    def __init__(self):
-        pass
-
-
-class Container:
-    def __init__(self, path: str = None, attachments=[]):
-        if path is None:
-            return
+class MetaContainer:
+    def __init__(self, containers_paths, attachments_paths):
+        self.__container_list = containers_paths
         self.__stream_list = []
-        ffmpeg_probe = probe(path)
-        for ffmpeg_stream in ffmpeg_probe['streams']:
-            stream_attributes = {}
-            if 'disposition' in ffmpeg_stream:
-                stream_attributes.update((k, bool(v)) for k, v in ffmpeg_stream['disposition'].items())
-            if 'tags' in ffmpeg_stream:
-                stream_attributes.update(ffmpeg_stream['tags'])
-            codec_type = ffmpeg_stream['codec_type']
-            stream_id = ffmpeg_stream['index']
-            if codec_type == 'video':
-                stream_instance = VideoStream(stream_id, stream_attributes)
-            elif codec_type == 'audio':
-                stream_instance = VideoStream(stream_id, stream_attributes)
-            elif codec_type == 'subtitle':
-                # Pass subtitle file path only if they aren't embedded
-                if path.rpartition('.')[-1] in settings.subtitles_extensions:
-                    subtitle_path = path
-                else:
-                    subtitle_path = None
-                stream_instance = SubtitleStream(stream_id, subtitle_path, stream_attributes)
-            else:
-                stream_instance = Stream(stream_id, stream_attributes)
-            self.__stream_list.append(stream_instance)
         self.__attach_list = []
+        self.__missing_fonts = []
 
-    def compile_cmd(self, compiler=None, compiler_config=None) -> str:
-        return ""
+        self.__font_dict = {}
+        self.create_font_dict(attachments_paths)
 
-    def join(self, other):
-        new_container = Container()
-        new_container.__stream_list = self.__stream_list.extend(other.__stream_list)
-        new_container.__attach_list = self.__attach_list.extend(other.__attach_list)
-        return new_container
+        """Get all stream from containers"""
+        for container_id, container_path in enumerate(self.__container_list):
+            self.get_streams(container_id, container_path)
+            
+        self.__stream_list.sort(key=lambda x: x.type)
+        self.clean_attachments()
 
+        print("Streams: ")
+        for stream in self.__stream_list:
+            print(str(stream))
+        print("Attachments: ", self.__attach_list)
+
+    def create_font_dict(self, attachments_paths: str):
+        """ Create dict like {font_name:font_path}
+
+        """
+        for attach in attachments_paths:
+            self.__font_dict[Font.get_font_name(attach)] = attach
+
+    def clean_attachments(self):
+        required_fonts = []
+        self.__missing_fonts = []
+        for stream in self.__stream_list:
+            if stream.type == StreamTypes.SUBTITLE:
+                required_fonts += stream.required_fonts        
+        for font in required_fonts:
+            try:
+                self.__attach_list.append(self.__font_dict[font])
+            except:
+                self.__missing_fonts.append(font)
+
+    def get_streams(self, container_id, container_path):
+        """ Create stream entity from all containers.
+
+        """
+        stream_path = None
+        ffmpeg_probe = probe(container_path)
+        if len(ffmpeg_probe["streams"]) <= 1:
+            stream_path = container_path
+        for ffmpeg_stream in ffmpeg_probe["streams"]:
+            stream_attributes = {}
+            if "disposition" in ffmpeg_stream:
+                stream_attributes.update(
+                    (k, bool(v)) for k, v in ffmpeg_stream["disposition"].items()
+                )
+            if "tags" in ffmpeg_stream:
+                stream_attributes.update(ffmpeg_stream["tags"])
+            codec_type = ffmpeg_stream["codec_type"]
+            stream_id = ffmpeg_stream["index"]
+            if codec_type == "video":
+                self.__stream_list.append(
+                    VideoStream(container_id, stream_id, stream_attributes)
+                )
+            elif codec_type == "audio":
+                self.__stream_list.append(
+                    AudioStream(container_id, stream_id, stream_attributes)
+                )
+            elif codec_type == "subtitle":
+                self.__stream_list.append(
+                    SubtitleStream(
+                        container_id, stream_id, stream_attributes, stream_path
+                    )
+                )
 
 class Stream:
-    """This class represents a Stream, which is a _media_ file (not a font or something)"""
-
-    def __init__(self, stream_id: int, attributes: dict = {}):
+    def __init__(
+        self, container_id: int, stream_id: int, attributes: dict = {}, path=None
+    ):
+        self.__container_id = container_id
         self.__stream_id = stream_id
-        # Set attributes of stream
-        default_attr = dict(lang=None, default=None, forced=None)
-        allowed_attr = default_attr.keys()
-        default_attr.update(attributes)
-        self.__dict__.update((k, v) for k, v in default_attr.items() if k in allowed_attr)
+        self.path = path
+        self.create_attributes(attributes)
+
+    @property
+    def container_id(self):
+        return self.__container_id
 
     @property
     def stream_id(self):
         return self.__stream_id
 
+    def create_attributes(self, attributes: dict):
+        default_attr = dict(lang=None, default=None, forced=None)
+        allowed_attr = default_attr.keys()
+        default_attr.update(attributes)
+        self.__dict__.update(
+            (k, v) for k, v in default_attr.items() if k in allowed_attr
+        )
+
+    def __repr__(self):
+        return "{0}:{1} \n({2})\n".format(self.container_id,self.stream_id,self.__dict__)
+
+
+class VideoStream(Stream):
+    def __init__(self, container_id: int, stream_id: int, attributes: dict = {}):
+        super().__init__(container_id, stream_id, attributes)
+        self.type = StreamTypes.VIDEO
+
+
+class AudioStream(Stream):
+    def __init__(self, container_id: int, stream_id: int, attributes: dict = {}):
+        super().__init__(container_id, stream_id, attributes)
+        self.type = StreamTypes.AUDIO
+
 
 class SubtitleStream(Stream):
     """Differs from _Stream_ in a field required_fonts and path"""
 
-    def __init__(self, stream_id: int, path: str = None, attributes: dict = {}):
-        super().__init__(stream_id, attributes)
-        self.__path = path
+    def __init__(
+        self, container_id: int, stream_id: int, attributes: dict = {}, path: str = None
+    ):
+        super().__init__(container_id, stream_id, attributes,path)
+        self.type = StreamTypes.SUBTITLE
+        
+    def create_attributes(self,attributes):
+        super().create_attributes(attributes)
         self.__required_fonts = []
         self.__encoding = ""
         """ Update subtitle specific metadata"""
-        self.__detect_codepage()
-        self.__detect_subtitle_lang()
-        self.__detect_required_fonts()
+        if self.path != None:
+            self.__detect_codepage()
+            self.__detect_subtitle_lang()
+            self.__detect_required_fonts()
 
     @property
     def required_fonts(self):
         return self.__required_fonts
 
     def __detect_subtitle_lang(self):
-        if self.__path is None:
+        if self.path is None:
             return
         subtitle_text = ""
         try:
-            subs = pysubs2.load(self.__path, encoding=self.__encoding)
+            subs = pysubs2.load(self.path, encoding=self.__encoding)
             for line in subs:
                 subtitle_text += line.text
             lang_alpha2 = langdetect.detect(subtitle_text)
@@ -103,61 +169,37 @@ class SubtitleStream(Stream):
             self.lang = ""
 
     def __detect_codepage(self):
-        if self.__path is None:
+        if self.path is None:
             return
-        with open(self.__path, "rb") as file:
+        with open(self.path, "rb") as file:
             self.__encoding = chardet.detect(file.read())["encoding"]
-    
+
     def __detect_required_fonts(self):
-        if self.__path is None:
+        if self.path is None:
             return
         try:
-            subs = pysubs2.load(self.__path, encoding=self.__encoding)
+            subs = pysubs2.load(self.path, encoding=self.__encoding)
             for line in subs:
                 self.__required_fonts.append(subs.styles[line.style].fontname)
         except UnicodeDecodeError:
             pass
         self.__required_fonts = list(dict.fromkeys(self.__required_fonts))
 
-
-class VideoStream(Stream):
-
-    def __init__(self, stream_id: int, attributes: dict = {}):
-        super().__init__(stream_id, attributes)
-
-
-class AudioStream(Stream):
-
-    def __init__(self, stream_id: int, attributes: dict = {}):
-        super().__init__(stream_id, attributes)
-
-
-class Attachment:
-    def __init__(self, path: str):
+class Attach:
+    def __init__(self,path):
         self.__path = path
 
-    @property
-    def path(self):
-        return self.__path
 
+class Font:
+    def __init__(self):
+        pass
 
-class FontAttachment(Attachment):
-    def __init__(self, path):
-        super().__init__(path)
-        self.__font_names = []
-        self.get_font_names()
-
-    @property
-    def font_names(self):
-        return self.__font_names
-
-    def get_font_names(self):
-        if self.path is None:
-            return
-        font = ttLib.TTFont(self.path)
+    @staticmethod
+    def get_font_name(path):
+        font = ttLib.TTFont(path)
         name = ""
-        for record in font['name'].names:
+        for record in font["name"].names:
             if record.nameID == 4:
                 name = str(record)
                 break
-        self.__font_names.append(name)
+        return name
