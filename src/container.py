@@ -78,6 +78,7 @@ class MetaContainer:
 
         """
         stream_path = None
+        print("Container №{0} - {1}".format(container_id,container_path))
         ffmpeg_probe = probe(container_path)
         if len(ffmpeg_probe["streams"]) <= 1:
             stream_path = container_path
@@ -196,7 +197,10 @@ class SubtitleStream(Stream):
         try:
             subs = pysubs2.load(self.path, encoding=self.__encoding)
             for line in subs:
-                self.__required_fonts.append(subs.styles[line.style].fontname)
+                try:
+                    self.__required_fonts.append(subs.styles[line.style].fontname)
+                except KeyError:
+                    pass
         except UnicodeDecodeError:
             pass
         self.__required_fonts = list(dict.fromkeys(self.__required_fonts))
