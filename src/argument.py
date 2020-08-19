@@ -26,9 +26,9 @@ class Argument:
                 pass
             else:
                 """ Default template - Title EpNum.mkv """
-            info = Argument.__parse_name(container.container_list[0])
-            new_name = "{0} {1}.mkv".format(info['title'],info['ep_num']) 
-            result_str += ' "{0}"'.format(str().join(new_name))
+                info = Argument.__parse_name(container.container_list[0])
+                new_name = "{0} {1}.mkv".format(info['title'],info['ep_num']) 
+                result_str += ' "{0}"'.format(str().join(new_name))
         print("\n"+result_str+"\n")
         return result_str
 
