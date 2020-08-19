@@ -10,10 +10,12 @@ class Argument:
         for input in container.container_list:
             result_str += ' -i "{0}"'.format(input)
         """Stream sections"""
+        stream_count = 0 
         for stream in container.stream_list:
             result_str += ' -map {0}:{1}'.format(stream.container_id,stream.stream_id)
             result_str += ' -c copy' 
-            if stream.lang: result_str += ' -metadata language={0}'.format(stream.lang)
+            if stream.lang: result_str += ' -metadata:s:{0} language={1}'.format(stream_count,stream.lang)
+            stream_count += 1
         for num,font in enumerate(container.attach_list):
             result_str+= ' -attach "{0}" -c copy -metadata:s:t:{1} mimetype=application/x-truetype-font'.format(font,num)
         if new_name: result_str += ' "{0}"'.format(new_name)
