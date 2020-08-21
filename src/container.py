@@ -11,10 +11,12 @@ import settings
 
 # We can convert TTC to TTF files with https://github.com/yhchen/ttc2ttf
 
+
 class StreamTypes(enum.IntEnum):
     VIDEO = 0
     AUDIO = 1
     SUBTITLE = 2
+
 
 class MetaContainer:
     def __init__(self, containers_paths, attachments_paths):
@@ -29,7 +31,7 @@ class MetaContainer:
         """Get all stream from containers"""
         for container_id, container_path in enumerate(self.__container_list):
             self.get_streams(container_id, container_path)
-            
+
         self.__stream_list.sort(key=lambda x: x.type)
         self.clean_attachments()
 
@@ -66,7 +68,7 @@ class MetaContainer:
         self.__missing_fonts = []
         for stream in self.__stream_list:
             if stream.type == StreamTypes.SUBTITLE:
-                required_fonts += stream.required_fonts        
+                required_fonts += stream.required_fonts
         for font in required_fonts:
             try:
                 self.__attach_list.append(self.__font_dict[font])
@@ -78,7 +80,7 @@ class MetaContainer:
 
         """
         stream_path = None
-        print("Container №{0} - {1}".format(container_id,container_path))
+        print("Container №{0} - {1}".format(container_id, container_path))
         ffmpeg_probe = probe(container_path)
         if len(ffmpeg_probe["streams"]) <= 1:
             stream_path = container_path
@@ -107,6 +109,7 @@ class MetaContainer:
                     )
                 )
 
+
 class Stream:
     def __init__(
         self, container_id: int, stream_id: int, attributes: dict = {}, path=None
@@ -133,7 +136,9 @@ class Stream:
         )
 
     def __repr__(self):
-        return "{0}:{1} \n({2})\n".format(self.container_id,self.stream_id,self.__dict__)
+        return "{0}:{1} \n({2})\n".format(
+            self.container_id, self.stream_id, self.__dict__
+        )
 
 
 class VideoStream(Stream):
@@ -154,10 +159,10 @@ class SubtitleStream(Stream):
     def __init__(
         self, container_id: int, stream_id: int, attributes: dict = {}, path: str = None
     ):
-        super().__init__(container_id, stream_id, attributes,path)
+        super().__init__(container_id, stream_id, attributes, path)
         self.type = StreamTypes.SUBTITLE
-        
-    def create_attributes(self,attributes):
+
+    def create_attributes(self, attributes):
         super().create_attributes(attributes)
         self.__required_fonts = []
         self.__encoding = ""
@@ -205,8 +210,9 @@ class SubtitleStream(Stream):
             pass
         self.__required_fonts = list(dict.fromkeys(self.__required_fonts))
 
+
 class Attach:
-    def __init__(self,path):
+    def __init__(self, path):
         self.__path = path
 
 

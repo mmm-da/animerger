@@ -19,6 +19,7 @@ from settings import (
     video_extensions,
 )
 
+
 class Scanus:
     def __init__(self):
         super().__init__()
