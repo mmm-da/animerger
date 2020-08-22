@@ -20,7 +20,7 @@ class StreamTypes(enum.IntEnum):
 
 
 class MetaContainer:
-    def __init__(self, containers_paths, attachments_paths,name_template:str = None):
+    def __init__(self, containers_paths, attachments_paths,name_template:str = None,title = None):
         self.__container_list = containers_paths
         self.__stream_list = []
         self.__attach_list = []
@@ -30,6 +30,10 @@ class MetaContainer:
         self.__create_font_dict(attachments_paths)
         name_info = self.__parse_name(self.container_list[0])
         if name_info:
+            if title:
+                name_info["title"] = title
+            if name_info["ep_num"] is None:
+                name_info["ep_num"] = ""
             if name_template:
                 # TEMPLATE UNIMPLEMENTED MAGIC
                 pass
@@ -40,7 +44,7 @@ class MetaContainer:
                 )
         else:
             self.__name = pathlib.Path(self.container_list[0]).name
-
+        
         """Get all stream from containers"""
         for container_id, container_path in enumerate(self.__container_list):
             self.__get_streams(container_id, container_path)
@@ -81,6 +85,7 @@ class MetaContainer:
         if (parse_result["anime_title"] is not None) and (
             parse_result["episode_number"] is not None
         ):
+            parse_result["anime_title"] = pathlib.Path(parse_result["anime_title"]).name
             return dict(
                 {
                     "title": parse_result["anime_title"],
