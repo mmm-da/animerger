@@ -6,3 +6,4 @@ iso-639>=0.4.5          # scanus
 ffmpeg-python >= 0.2.0  # container
 fonttools>=4.12.1       # container
 anitopy>=2.0.0          # argument
+click>=7.1.2            # cli
