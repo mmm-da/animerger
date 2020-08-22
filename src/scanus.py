@@ -72,10 +72,12 @@ class Scanus:
         self._search_templates(dir_path)
         _scan_directory(dir_path)
 
-    def get_container_list(self):
+    @property
+    def container_list(self):
         return list(self._container_dict.values())
 
-    def get_attach_list(self):
+    @property
+    def attach_list(self):
         return list(self._attach_dict.values())
 
 
