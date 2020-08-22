@@ -22,7 +22,7 @@ def scan(path,special,verbose,silent):
         click.echo("Scan directory: {}".format(path))
         if len(scanner.container_list):
             result_str = "Found {} containers.".format(len(scanner.container_list))
-            if len(scanner.container_list): 
+            if len(scanner.attach_list): 
                 result_str = result_str[:-1]+", with {} attachments.".format(len(scanner.attach_list))
             print(result_str)
         else:
