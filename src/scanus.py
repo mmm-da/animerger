@@ -25,7 +25,7 @@ class Scanus:
         super().__init__()
         self._search_sp = False
         self._container_dict = {}
-        self._font_dict = {}
+        self._attach_dict = {}
 
     @property
     def search_sp(self):
@@ -55,7 +55,7 @@ class Scanus:
         """
         dir_path = Path(dir_path)
         self._container_dict = {}
-        self._font_dict = {}
+        self._attach_dict = {}
 
         def _scan_directory(path):
             for child in path.iterdir():
@@ -67,7 +67,7 @@ class Scanus:
                         if re.match(template_regex, child.name) != None:
                             self._container_dict[template].append(str(child))
                 elif child.suffix.lower() in fonts_extensions:
-                    self._font_dict[child.name] = str(child)
+                    self._attach_dict[child.name] = str(child)
 
         self._search_templates(dir_path)
         _scan_directory(dir_path)
@@ -75,8 +75,8 @@ class Scanus:
     def get_container_list(self):
         return list(self._container_dict.values())
 
-    def get_font_list(self):
-        return list(self._font_dict.values())
+    def get_attach_list(self):
+        return list(self._attach_dict.values())
 
 
 if __name__ == "__main__":
