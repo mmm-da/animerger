@@ -1,3 +1,5 @@
+import pathlib
+import anitopy
 from ffmpeg import probe
 import chardet
 import pysubs2
@@ -11,7 +13,6 @@ import settings
 
 # We can convert TTC to TTF files with https://github.com/yhchen/ttc2ttf
 
-
 class StreamTypes(enum.IntEnum):
     VIDEO = 0
     AUDIO = 1
@@ -19,26 +20,37 @@ class StreamTypes(enum.IntEnum):
 
 
 class MetaContainer:
-    def __init__(self, containers_paths, attachments_paths):
+    def __init__(self, containers_paths, attachments_paths,name_template:str = None):
         self.__container_list = containers_paths
         self.__stream_list = []
         self.__attach_list = []
         self.__missing_fonts = []
 
         self.__font_dict = {}
-        self.create_font_dict(attachments_paths)
+        self.__create_font_dict(attachments_paths)
+        name_info = self.__parse_name(self.container_list[0])
+        if name_info:
+            if name_template:
+                # TEMPLATE UNIMPLEMENTED MAGIC
+                pass
+            else:
+                # Default template is "Title EpNum.mkv"
+                self.__name = "{0} {1}.mkv".format(
+                    name_info["title"], name_info["ep_num"]
+                )
+        else:
+            self.__name = pathlib.Path(self.container_list[0]).name
 
         """Get all stream from containers"""
         for container_id, container_path in enumerate(self.__container_list):
-            self.get_streams(container_id, container_path)
+            self.__get_streams(container_id, container_path)
 
         self.__stream_list.sort(key=lambda x: x.type)
-        self.clean_attachments()
+        self.__clean_attachments()
 
-        print("Streams: ")
-        for stream in self.__stream_list:
-            print(str(stream))
-        print("Attachments: ", self.__attach_list)
+    @property
+    def name(self):
+        return self.__name
 
     @property
     def container_list(self):
@@ -56,14 +68,36 @@ class MetaContainer:
     def missing_fonts(self):
         return self.__missing_fonts
 
-    def create_font_dict(self, attachments_paths: str):
+    def __parse_name(self,name: str) -> dict:
+        anitopy_options = dict(
+            {
+                "parse_episode_number": True,
+                "parse_episode_title": False,
+                "parse_file_extension": False,
+                "parse_release_group": False,
+            }
+        )
+        parse_result = anitopy.parse(name, options=anitopy_options)
+        if (parse_result["anime_title"] is not None) and (
+            parse_result["episode_number"] is not None
+        ):
+            return dict(
+                {
+                    "title": parse_result["anime_title"],
+                    "ep_num": parse_result["episode_number"],
+                }
+            )
+        else:
+            return None
+
+    def __create_font_dict(self, attachments_paths: str):
         """ Create dict like {font_name:font_path}
 
         """
         for attach in attachments_paths:
             self.__font_dict[Font.get_font_name(attach)] = attach
 
-    def clean_attachments(self):
+    def __clean_attachments(self):
         required_fonts = []
         self.__missing_fonts = []
         for stream in self.__stream_list:
@@ -75,12 +109,11 @@ class MetaContainer:
             except:
                 self.__missing_fonts.append(font)
 
-    def get_streams(self, container_id, container_path):
+    def __get_streams(self, container_id, container_path):
         """ Create stream entity from all containers.
 
         """
         stream_path = None
-        print("Container №{0} - {1}".format(container_id, container_path))
         ffmpeg_probe = probe(container_path)
         if len(ffmpeg_probe["streams"]) <= 1:
             stream_path = container_path

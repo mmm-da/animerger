@@ -1,5 +1,5 @@
 import os
-import anitopy
+import pathlib
 from iso639 import languages
 from ffmpeg import probe
 from container import MetaContainer, StreamTypes
@@ -12,7 +12,7 @@ class Argument:
 
         # Input section
         for input in container.container_list:
-            result_str += ' -i "{0}"'.format(input)
+            result_str += ' -i "{0}"'.format(input)          
 
         # Stream section
         stream_count = 0
@@ -34,55 +34,22 @@ class Argument:
             result_str += ' -attach "{0}" -c copy -metadata:s:t:{1} mimetype=application/x-truetype-font'.format(
                 font, num
             )
-
-        # Container naming section
-        # Parse original container name for title and ep_num
-        name_info = Argument.__parse_name(container.container_list[0])
+        # Addtional ffmpeg args
+        if kwargs["additional_args"]:
+            result_str += kwargs["additional_args"]
         # Save directory path kwargs check, if not exist save to *original_path*/merged
         save_path = ""
         if kwargs["save_path"]:
             save_path = kwargs["save_path"]
         else:
-            save_path = os.path.dirname(container.container_list[0]) + "\merged"
+            save_path = pathlib.Path(container.container_list[0]).parent + "\merged"
             try:
                 os.mkdir(save_path)
             except OSError:
                 pass
         # Name template kwarg check
-        if kwargs["name_template"]:
-            # TEMPLATE UNIMPLEMENTED MAGIC
-            pass
-        else:
-            # Default template is "Title EpNum.mkv"
-            container_name = "{0} {1}.mkv".format(
-                name_info["title"], name_info["ep_num"]
-            )
-            result_str += ' "{}/{}"'.format(save_path, container_name)
+        result_str += ' "{}/{}"'.format(save_path, container.name) 
         return result_str
-
-    @staticmethod
-    def __parse_name(name: str) -> dict:
-        anitopy_options = dict(
-            {
-                "parse_episode_number": True,
-                "parse_episode_title": False,
-                "parse_file_extension": False,
-                "parse_release_group": False,
-            }
-        )
-        parse_result = anitopy.parse(name, options=anitopy_options)
-        if (parse_result["anime_title"] is not None) and (
-            parse_result["episode_number"] is not None
-        ):
-            return dict(
-                {
-                    "title": parse_result["anime_title"],
-                    "ep_num": parse_result["episode_number"],
-                }
-            )
-        else:
-            return None
-
 
 if __name__ == "__main__":
     print("Argument isn't executable module, but in Ka-52 you can start it.")
