@@ -62,7 +62,7 @@ class Argument:
         )
         parse_result = anitopy.parse(name, options=anitopy_options)
         if (parse_result["anime_title"] is not None) and (
-            parse_result["episode_number" is not None]
+            parse_result["episode_number"] is not None
         ):
             return dict(
                 {
