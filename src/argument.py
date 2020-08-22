@@ -18,6 +18,7 @@ class Argument:
         stream_count = 0
         for stream in container.stream_list:
             result_str += " -map {0}:{1}".format(stream.container_id, stream.stream_id)
+            # Video/Audio streams codec kwargs check
             if (stream.type == StreamTypes.VIDEO) and kwargs["video_codec"]:
                 result_str += " -c {0}".format(kwargs["video_codec"])
             elif (stream.type == StreamTypes.AUDIO) and kwargs["audio_codec"]:
@@ -35,19 +36,28 @@ class Argument:
             )
 
         # Container naming section
+        # Parse original container name for title and ep_num
         name_info = Argument.__parse_name(container.container_list[0])
-        if kwargs["new_name"]:
-            result_str += ' "{0}"'.format(kwargs["new_name"])
+        # Save directory path kwargs check, if not exist save to *original_path*/merged
+        save_path = ""
+        if kwargs["save_path"]:
+            save_path = kwargs["save_path"]
         else:
-            if kwargs["name_template"]:
-                # TEMPLATE UNIMPLEMENTED MAGIC
+            save_path = os.path.dirname(container.container_list[0]) + "\merged"
+            try:
+                os.mkdir(save_path)
+            except OSError:
                 pass
-            else:
-                # Default template is "Title EpNum.mkv"
-                container_name = "{0} {1}.mkv".format(
-                    name_info["title"], name_info["ep_num"]
-                )
-                result_str += ' "{0}"'.format(str().join(container_name))
+        # Name template kwarg check
+        if kwargs["name_template"]:
+            # TEMPLATE UNIMPLEMENTED MAGIC
+            pass
+        else:
+            # Default template is "Title EpNum.mkv"
+            container_name = "{0} {1}.mkv".format(
+                name_info["title"], name_info["ep_num"]
+            )
+            result_str += ' "{}/{}"'.format(save_path, container_name)
         return result_str
 
     @staticmethod
