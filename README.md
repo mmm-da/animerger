@@ -12,5 +12,5 @@
 Merge command:
 > python .\animerger.py merge -t Katanagatari "\\OPENMEDIAVAULT\nas-hdd\media\anime\Katanagatari"
 
-![Before merge](https://user-images.githubusercontent.com/39336091/91976327-6dcfd300-ed29-11ea-8455-ee4e0ae7888d.png)
-![After merge](https://user-images.githubusercontent.com/39336091/91990493-78469880-ed3a-11ea-9b8b-a79995ed6aa6.png)
+![](https://user-images.githubusercontent.com/39336091/91992923-65819300-ed3d-11ea-85f1-48060babfef7.png)
+
