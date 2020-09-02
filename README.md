@@ -7,6 +7,14 @@
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/spAm25/animerger-scanus?style=flat-square)
 ![GitHub](https://img.shields.io/github/license/spAm25/animerger-scanus?style=flat-square)
 
+## Features
+
+* Auto detect subtitle language by [langdetect](https://github.com/mimino666/langdetect/)
+* Renaming containers by template (wip)
+* ...
+* ... 
+* I don't know how write about features...
+
 ## Example
 
 Merge command:
