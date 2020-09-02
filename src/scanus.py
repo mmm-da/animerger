@@ -19,12 +19,13 @@ from settings import (
     video_extensions,
 )
 
+
 class Scanus:
     def __init__(self):
         super().__init__()
         self._search_sp = False
         self._container_dict = {}
-        self._font_dict = {}
+        self._attach_dict = {}
 
     @property
     def search_sp(self):
@@ -36,7 +37,6 @@ class Scanus:
 
     def _search_templates(self, path):
         """ Search  video containers in path
-
     
         """
         dir_path = Path(path)
@@ -50,11 +50,10 @@ class Scanus:
     def scan_directory(self, dir_path):
         """ Search all containers (video, audio, subtitles, fonts) in dir_path
 
-    
         """
         dir_path = Path(dir_path)
         self._container_dict = {}
-        self._font_dict = {}
+        self._attach_dict = {}
 
         def _scan_directory(path):
             for child in path.iterdir():
@@ -66,16 +65,18 @@ class Scanus:
                         if re.match(template_regex, child.name) != None:
                             self._container_dict[template].append(str(child))
                 elif child.suffix.lower() in fonts_extensions:
-                    self._font_dict[child.name] = str(child)
+                    self._attach_dict[child.name] = str(child)
 
         self._search_templates(dir_path)
         _scan_directory(dir_path)
 
-    def get_container_list(self):
+    @property
+    def container_list(self):
         return list(self._container_dict.values())
 
-    def get_font_list(self):
-        return list(self._font_dict.values())
+    @property
+    def attach_list(self):
+        return list(self._attach_dict.values())
 
 
 if __name__ == "__main__":

@@ -1,3 +1,5 @@
+import pathlib
+import anitopy
 from ffmpeg import probe
 import chardet
 import pysubs2
@@ -16,27 +18,43 @@ class StreamTypes(enum.IntEnum):
     AUDIO = 1
     SUBTITLE = 2
 
+
 class MetaContainer:
-    def __init__(self, containers_paths, attachments_paths):
+    def __init__(self, containers_paths, attachments_paths,name_template:str = None,title = None):
         self.__container_list = containers_paths
         self.__stream_list = []
         self.__attach_list = []
         self.__missing_fonts = []
 
         self.__font_dict = {}
-        self.create_font_dict(attachments_paths)
-
+        self.__create_font_dict(attachments_paths)
+        name_info = self.__parse_name(self.container_list[0])
+        if name_info:
+            if title:
+                name_info["title"] = title
+            if name_info["ep_num"] is None:
+                name_info["ep_num"] = ""
+            if name_template:
+                # TEMPLATE UNIMPLEMENTED MAGIC
+                pass
+            else:
+                # Default template is "Title EpNum.mkv"
+                self.__name = "{0} {1}.mkv".format(
+                    name_info["title"], name_info["ep_num"]
+                )
+        else:
+            self.__name = pathlib.Path(self.container_list[0]).name
+        
         """Get all stream from containers"""
         for container_id, container_path in enumerate(self.__container_list):
-            self.get_streams(container_id, container_path)
-            
-        self.__stream_list.sort(key=lambda x: x.type)
-        self.clean_attachments()
+            self.__get_streams(container_id, container_path)
 
-        print("Streams: ")
-        for stream in self.__stream_list:
-            print(str(stream))
-        print("Attachments: ", self.__attach_list)
+        self.__stream_list.sort(key=lambda x: x.type)
+        self.__clean_attachments()
+
+    @property
+    def name(self):
+        return self.__name
 
     @property
     def container_list(self):
@@ -54,26 +72,49 @@ class MetaContainer:
     def missing_fonts(self):
         return self.__missing_fonts
 
-    def create_font_dict(self, attachments_paths: str):
+    def __parse_name(self,name: str) -> dict:
+        anitopy_options = dict(
+            {
+                "parse_episode_number": True,
+                "parse_episode_title": False,
+                "parse_file_extension": False,
+                "parse_release_group": False,
+            }
+        )
+        parse_result = anitopy.parse(name, options=anitopy_options)
+        if (parse_result["anime_title"] is not None) and (
+            parse_result["episode_number"] is not None
+        ):
+            parse_result["anime_title"] = pathlib.Path(parse_result["anime_title"]).name
+            return dict(
+                {
+                    "title": parse_result["anime_title"],
+                    "ep_num": parse_result["episode_number"],
+                }
+            )
+        else:
+            return None
+
+    def __create_font_dict(self, attachments_paths: str):
         """ Create dict like {font_name:font_path}
 
         """
         for attach in attachments_paths:
             self.__font_dict[Font.get_font_name(attach)] = attach
 
-    def clean_attachments(self):
+    def __clean_attachments(self):
         required_fonts = []
         self.__missing_fonts = []
         for stream in self.__stream_list:
             if stream.type == StreamTypes.SUBTITLE:
-                required_fonts += stream.required_fonts        
+                required_fonts += stream.required_fonts
         for font in required_fonts:
             try:
                 self.__attach_list.append(self.__font_dict[font])
             except:
                 self.__missing_fonts.append(font)
 
-    def get_streams(self, container_id, container_path):
+    def __get_streams(self, container_id, container_path):
         """ Create stream entity from all containers.
 
         """
@@ -106,6 +147,7 @@ class MetaContainer:
                     )
                 )
 
+
 class Stream:
     def __init__(
         self, container_id: int, stream_id: int, attributes: dict = {}, path=None
@@ -132,7 +174,9 @@ class Stream:
         )
 
     def __repr__(self):
-        return "{0}:{1} \n({2})\n".format(self.container_id,self.stream_id,self.__dict__)
+        return "{0}:{1} \n({2})\n".format(
+            self.container_id, self.stream_id, self.__dict__
+        )
 
 
 class VideoStream(Stream):
@@ -153,10 +197,10 @@ class SubtitleStream(Stream):
     def __init__(
         self, container_id: int, stream_id: int, attributes: dict = {}, path: str = None
     ):
-        super().__init__(container_id, stream_id, attributes,path)
+        super().__init__(container_id, stream_id, attributes, path)
         self.type = StreamTypes.SUBTITLE
-        
-    def create_attributes(self,attributes):
+
+    def create_attributes(self, attributes):
         super().create_attributes(attributes)
         self.__required_fonts = []
         self.__encoding = ""
@@ -196,13 +240,17 @@ class SubtitleStream(Stream):
         try:
             subs = pysubs2.load(self.path, encoding=self.__encoding)
             for line in subs:
-                self.__required_fonts.append(subs.styles[line.style].fontname)
+                try:
+                    self.__required_fonts.append(subs.styles[line.style].fontname)
+                except KeyError:
+                    pass
         except UnicodeDecodeError:
             pass
         self.__required_fonts = list(dict.fromkeys(self.__required_fonts))
 
+
 class Attach:
-    def __init__(self,path):
+    def __init__(self, path):
         self.__path = path
 
 
