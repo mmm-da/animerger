@@ -29,42 +29,19 @@ def __scan(path, special, verbose, silent):
                 click.echo("{:3d}. ".format(i) + "%s" % click.format_filename(attach))
     return (scanner.container_list, scanner.attach_list)
 
-
-@click.group(invoke_without_command=True)
-@click.pass_context
-def cli(ctx):
-    if ctx.invoked_subcommand is None:
-        click.echo("Interactive mode not implemented")
-
-
-@cli.command(help="Scan path for containers")
+@click.command(help="Generate ffmpeg command line for merging containers")
 @click.argument("path", type=click.Path())
-@click.option("-v", "--verbose", is_flag=True, help="Enables verbose mode")
-@click.option("-s", "--silent", is_flag=True, help="Enables silent mode")
-@click.option(
-    "--special",
-    "-r",
-    "--sp",
-    is_flag=True,
-    help="Turn on nested search in path (special ep search).",
-)
-def scan(path, special, verbose, silent):
-    __scan(path, special, verbose, silent)
-
-
-@cli.command(help="Generate ffmpeg command line for merging containers")
-@click.argument("path", type=click.Path())
-@click.option("-v", "--verbose", is_flag=True, help="Enables verbose mode")
-@click.option("-s", "--silent", is_flag=True, help="Enables silent mode")
+@click.option("-v", "--verbose", is_flag=True, help="Enable verbose mode")
+@click.option("-s", "--silent", is_flag=True, help="Enable silent mode")
 @click.option(
     "-r",
     "--special",
     is_flag=True,
     help="Turn on nested search in path (special ep search).",
 )
-@click.option("--save_path", type=click.types.Path(), help="Path to save new container")
-@click.option("--video_codec", "--vc", type=str, help="Codec for all video stream")
-@click.option("--audio_codec", "--ac", type=str, help="Codec for all audio stream")
+@click.option("--output_path", type=click.types.Path(), help="Output path")
+@click.option("--video_codec", "--vc", type=str, help="Video stream output codec")
+@click.option("--audio_codec", "--ac", type=str, help="Audio stream output codec")
 @click.option("--title", "-t", type=str, help="Title of release")
 @click.option("--additional_args", type=str, help="Additional args to ffmpeg")
 @click.option("--name_template", type=str, help="Template for naming containers")
@@ -110,4 +87,4 @@ def merge(
             run(command)
 
 if __name__ == "__main__":
-    cli()
+    merge()
