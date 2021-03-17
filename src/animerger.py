@@ -29,7 +29,6 @@ def __scan(path, special, verbose, silent):
                 click.echo("{:3d}. ".format(i) + "%s" % click.format_filename(attach))
     return (scanner.container_list, scanner.attach_list)
 
-@click.command(help="Generate ffmpeg command line for merging containers")
 @click.argument("path", type=click.Path())
 @click.option("-v", "--verbose", is_flag=True, help="Enable verbose mode")
 @click.option("-s", "--silent", is_flag=True, help="Enable silent mode")
@@ -39,14 +38,17 @@ def __scan(path, special, verbose, silent):
     is_flag=True,
     help="Turn on nested search in path (special ep search).",
 )
-@click.option("--output_path", type=click.types.Path(), help="Output path")
-@click.option("--video_codec", "--vc", type=str, help="Video stream output codec")
-@click.option("--audio_codec", "--ac", type=str, help="Audio stream output codec")
+@click.option("--save_path", type=click.types.Path(), help="Path to save new container")
+@click.option("--video_codec", "--vc", type=str, help="Codec for all video stream")
+@click.option("--audio_codec", "--ac", type=str, help="Codec for all audio stream")
 @click.option("--title", "-t", type=str, help="Title of release")
 @click.option("--additional_args", type=str, help="Additional args to ffmpeg")
 @click.option("--name_template", type=str, help="Template for naming containers")
 @click.option(
     "-c", "--only_compile", is_flag=True, help="Only generate command for ffmpeg"
+)
+@click.option(
+    "-p","--parse_name", is_flag=True, help="Turn on anitopy for smart renaming"
 )
 def merge(
     path,
@@ -60,18 +62,19 @@ def merge(
     save_path,
     additional_args,
     only_compile,
+    parse_name,
 ):
     container_list, attach_list = __scan(path, special, verbose, silent)
     command_list = []
 
     for i, container in enumerate(container_list, start=1):
-        meta_container = MetaContainer(container, attach_list, name_template, title)
+        meta_container = MetaContainer(container, attach_list, name_template, title,parse_name=parse_name)
         command = Argument.compile_mkv(
             meta_container,
             video_codec=video_codec,
             audio_codec=audio_codec,
             additional_args=additional_args,
-            save_path=save_path,
+            save_path=save_path
         )
         command_list.append(command)
         if not silent:

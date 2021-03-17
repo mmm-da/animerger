@@ -20,7 +20,7 @@ class StreamTypes(enum.IntEnum):
 
 
 class MetaContainer:
-    def __init__(self, containers_paths, attachments_paths,name_template:str = None,title = None):
+    def __init__(self, containers_paths, attachments_paths,name_template:str = None,title = None,parse_name:bool = False):
         self.__container_list = containers_paths
         self.__stream_list = []
         self.__attach_list = []
@@ -28,20 +28,23 @@ class MetaContainer:
 
         self.__font_dict = {}
         self.__create_font_dict(attachments_paths)
-        name_info = self.__parse_name(self.container_list[0])
-        if name_info:
-            if title:
-                name_info["title"] = title
-            if name_info["ep_num"] is None:
-                name_info["ep_num"] = ""
-            if name_template:
-                # TEMPLATE UNIMPLEMENTED MAGIC
-                pass
+        if parse_name:
+            name_info = self.__parse_name(self.container_list[0])
+            if name_info:
+                if title:
+                    name_info["title"] = title
+                if name_info["ep_num"] is None:
+                    name_info["ep_num"] = ""
+                if name_template:
+                    # TEMPLATE UNIMPLEMENTED MAGIC
+                    pass
+                else:
+                    # Default template is "Title EpNum.mkv"
+                    self.__name = "{0} {1}.mkv".format(
+                        name_info["title"], name_info["ep_num"]
+                    )
             else:
-                # Default template is "Title EpNum.mkv"
-                self.__name = "{0} {1}.mkv".format(
-                    name_info["title"], name_info["ep_num"]
-                )
+                self.__name = pathlib.Path(self.container_list[0]).name
         else:
             self.__name = pathlib.Path(self.container_list[0]).name
         
