@@ -29,6 +29,7 @@ def __scan(path, special, verbose, silent):
                 click.echo("{:3d}. ".format(i) + "%s" % click.format_filename(attach))
     return (scanner.container_list, scanner.attach_list)
 
+@click.command()
 @click.argument("path", type=click.Path())
 @click.option("-v", "--verbose", is_flag=True, help="Enable verbose mode")
 @click.option("-s", "--silent", is_flag=True, help="Enable silent mode")
