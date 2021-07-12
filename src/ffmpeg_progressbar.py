@@ -20,7 +20,7 @@ async def _stream_subprocess(cmd, stdout_cb, stderr_cb):
     return await process.wait()
 
 
-def execute(cmd, stdout_cb, stderr_cb):  
+def execute(cmd:list, stdout_cb, stderr_cb):  
     loop = asyncio.get_event_loop()
     rc = loop.run_until_complete(
         _stream_subprocess(
@@ -31,10 +31,22 @@ def execute(cmd, stdout_cb, stderr_cb):
     loop.close()
     return rc
 
-if __name__ == '__main__':  
-    with alive_progress.alive_bar(0) as bar:
-        execute(
-            ['ffmpeg', '-i', '/home/mda/Downloads/video2.mp4', '-vf', 'fps=5', '-vsync', '0', '/home/mda/Downloads/s4/%d.png'],
-            lambda x: print("STDOUT: %s" % x),
-            lambda x: bar(),
-        )
+
+def parse_ffmpeg_output(line):
+    print('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',line)
+    stdout_callback = lambda x: print(f"STDERR: {x}") 
+
+stdout_callback = parse_ffmpeg_output
+
+def exec_with_progress(cmd:list):
+    execute(
+        cmd,
+        lambda x: print(f"STDOUT: {x}"),
+        stdout_callback,
+    )
+
+exec_with_progress(
+    [
+        'ffmpeg',
+    ]
+)
