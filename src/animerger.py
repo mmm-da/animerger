@@ -2,7 +2,9 @@ import click
 from scanus import Scanus
 from container import Stream, MetaContainer
 from argument import Argument
-from subprocess import run
+from ffmpeg_progressbar import exec_with_progress
+
+version = '0.2.0'
 
 def __scan(path, special, verbose, silent):
     scanner = Scanus()
@@ -30,6 +32,7 @@ def __scan(path, special, verbose, silent):
     return (scanner.container_list, scanner.attach_list)
 
 @click.command()
+@click.version_option(version)
 @click.argument("path", type=click.Path())
 @click.option("-v", "--verbose", is_flag=True, help="Enable verbose mode")
 @click.option("-s", "--silent", is_flag=True, help="Enable silent mode")
@@ -88,7 +91,7 @@ def merge(
                 for stream in meta_container.stream_list:
                     print(stream)
         if not only_compile:
-            run(command)
+            exec_with_progress(command,title=meta_container.name)
 
 if __name__ == "__main__":
     merge()
