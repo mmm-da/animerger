@@ -37,7 +37,6 @@ class Scanus:
 
     def _search_templates(self, path):
         """ Search  video containers in path
-
     
         """
         dir_path = Path(path)
@@ -51,7 +50,6 @@ class Scanus:
     def scan_directory(self, dir_path):
         """ Search all containers (video, audio, subtitles, fonts) in dir_path
 
-    
         """
         dir_path = Path(dir_path)
         self._container_dict = {}

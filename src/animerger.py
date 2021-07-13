@@ -29,33 +29,10 @@ def __scan(path, special, verbose, silent):
                 click.echo("{:3d}. ".format(i) + "%s" % click.format_filename(attach))
     return (scanner.container_list, scanner.attach_list)
 
-
-@click.group(invoke_without_command=True)
-@click.pass_context
-def cli(ctx):
-    if ctx.invoked_subcommand is None:
-        click.echo("Interactive mode not implemented")
-
-
-@cli.command(help="Scan path for containers")
+@click.command()
 @click.argument("path", type=click.Path())
-@click.option("-v", "--verbose", is_flag=True, help="Enables verbose mode")
-@click.option("-s", "--silent", is_flag=True, help="Enables silent mode")
-@click.option(
-    "--special",
-    "-r",
-    "--sp",
-    is_flag=True,
-    help="Turn on nested search in path (special ep search).",
-)
-def scan(path, special, verbose, silent):
-    __scan(path, special, verbose, silent)
-
-
-@cli.command(help="Scan and merge containers in PATH")
-@click.argument("path", type=click.Path())
-@click.option("-v", "--verbose", is_flag=True, help="Enables verbose mode")
-@click.option("-s", "--silent", is_flag=True, help="Enables silent mode")
+@click.option("-v", "--verbose", is_flag=True, help="Enable verbose mode")
+@click.option("-s", "--silent", is_flag=True, help="Enable silent mode")
 @click.option(
     "-r",
     "--special",
@@ -114,4 +91,4 @@ def merge(
             run(command)
 
 if __name__ == "__main__":
-    cli()
+    merge()
