@@ -22,7 +22,7 @@ async def _stream_subprocess(cmd, stdout_cb, stderr_cb):
     return await process.wait()
 
 
-def execute(cmd:list, stdout_cb, stderr_cb):  
+def execute(cmd, stdout_cb, stderr_cb):  
     loop = asyncio.get_event_loop()
     rc = loop.run_until_complete(
         _stream_subprocess(
@@ -38,8 +38,16 @@ total_duration = None
 current_duration = None
 stderr_log = []
 
-def exec_with_progress(cmd:list,title='Title'):
+def exec_with_progress(cmd,title='Title'):
+    global stderr_log
+    global total_duration
+    global current_duration
+    
     rc = 0
+    total_duration = None
+    current_duration = None
+    stderr_log = []
+    
     with alive_bar(manual=True,title=title) as bar:
         total_duration_regex = r'Duration: (\d\d:\d\d:\d\d.\d\d).*' 
         progress_tick_regex = r'out_time=(\d\d:\d\d:\d\d\.\d\d).*' 
