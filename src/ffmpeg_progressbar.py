@@ -23,7 +23,7 @@ async def _stream_subprocess(cmd, stdout_cb, stderr_cb):
 
 
 def execute(cmd, stdout_cb, stderr_cb):  
-    loop = asyncio.get_event_loop()
+    loop = asyncio.new_event_loop()
     rc = loop.run_until_complete(
         _stream_subprocess(
             cmd,
