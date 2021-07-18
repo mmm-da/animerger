@@ -7,11 +7,8 @@ import langdetect
 import iso639
 import enum
 
-from fontTools import ttLib
-
 import settings
 
-# We can convert TTC to TTF files with https://github.com/yhchen/ttc2ttf
 
 class StreamTypes(enum.IntEnum):
     VIDEO = 0
@@ -26,8 +23,7 @@ class MetaContainer:
         self.__attach_list = []
         self.__missing_fonts = []
 
-        self.__font_dict = {}
-        self.__create_font_dict(attachments_paths)
+        self.__create_attach_list(attachments_paths)
         if parse_name:
             name_info = self.__parse_name(self.container_list[0])
             if name_info:
@@ -53,7 +49,6 @@ class MetaContainer:
             self.__get_streams(container_id, container_path)
 
         self.__stream_list.sort(key=lambda x: x.type)
-        self.__clean_attachments()
 
     @property
     def name(self):
@@ -98,24 +93,12 @@ class MetaContainer:
         else:
             return None
 
-    def __create_font_dict(self, attachments_paths: str):
-        """ Create dict like {font_name:font_path}
+    def __create_attach_list(self, attachments_paths: str):
+        """ Create list like {font_name:font_path}
 
         """
         for attach in attachments_paths:
-            self.__font_dict[Font.get_font_name(attach)] = attach
-
-    def __clean_attachments(self):
-        required_fonts = []
-        self.__missing_fonts = []
-        for stream in self.__stream_list:
-            if stream.type == StreamTypes.SUBTITLE:
-                required_fonts += stream.required_fonts
-        for font in required_fonts:
-            try:
-                self.__attach_list.append(self.__font_dict[font])
-            except:
-                self.__missing_fonts.append(font)
+            self.__attach_list.append(attach)
 
     def __get_streams(self, container_id, container_path):
         """ Create stream entity from all containers.
@@ -211,7 +194,6 @@ class SubtitleStream(Stream):
         if self.path != None:
             self.__detect_codepage()
             self.__detect_subtitle_lang()
-            self.__detect_required_fonts()
 
     @property
     def required_fonts(self):
@@ -237,36 +219,7 @@ class SubtitleStream(Stream):
         with open(self.path, "rb") as file:
             self.__encoding = chardet.detect(file.read())["encoding"]
 
-    def __detect_required_fonts(self):
-        if self.path is None:
-            return
-        try:
-            subs = pysubs2.load(self.path, encoding=self.__encoding)
-            for line in subs:
-                try:
-                    self.__required_fonts.append(subs.styles[line.style].fontname)
-                except KeyError:
-                    pass
-        except UnicodeDecodeError:
-            pass
-        self.__required_fonts = list(dict.fromkeys(self.__required_fonts))
-
 
 class Attach:
     def __init__(self, path):
         self.__path = path
-
-
-class Font:
-    def __init__(self):
-        pass
-
-    @staticmethod
-    def get_font_name(path):
-        font = ttLib.TTFont(path)
-        name = ""
-        for record in font["name"].names:
-            if record.nameID == 4:
-                name = str(record)
-                break
-        return name

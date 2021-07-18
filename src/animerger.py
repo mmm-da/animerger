@@ -82,7 +82,6 @@ def merge(
         )
         command_list.append(command)
         if not silent:
-            click.echo("Container №{} - {}".format(i, meta_container.name))
             if only_compile:
                 click.echo("Command: ")
                 click.echo(command)
