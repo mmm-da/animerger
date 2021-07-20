@@ -13,6 +13,7 @@ import settings
 
 # We can convert TTC to TTF files with https://github.com/yhchen/ttc2ttf
 
+
 class StreamTypes(enum.IntEnum):
     VIDEO = 0
     AUDIO = 1
@@ -20,7 +21,14 @@ class StreamTypes(enum.IntEnum):
 
 
 class MetaContainer:
-    def __init__(self, containers_paths, attachments_paths,name_template:str = None,title = None,parse_name:bool = False):
+    def __init__(
+        self,
+        containers_paths,
+        attachments_paths,
+        name_template: str = None,
+        title=None,
+        parse_name: bool = False,
+    ):
         self.__container_list = containers_paths
         self.__stream_list = []
         self.__attach_list = []
@@ -47,7 +55,7 @@ class MetaContainer:
                 self.__name = pathlib.Path(self.container_list[0]).name
         else:
             self.__name = pathlib.Path(self.container_list[0]).name
-        
+
         """Get all stream from containers"""
         for container_id, container_path in enumerate(self.__container_list):
             self.__get_streams(container_id, container_path)
@@ -75,7 +83,7 @@ class MetaContainer:
     def missing_fonts(self):
         return self.__missing_fonts
 
-    def __parse_name(self,name: str) -> dict:
+    def __parse_name(self, name: str) -> dict:
         anitopy_options = dict(
             {
                 "parse_episode_number": True,
@@ -99,9 +107,7 @@ class MetaContainer:
             return None
 
     def __create_font_dict(self, attachments_paths: str):
-        """ Create dict like {font_name:font_path}
-
-        """
+        """Create dict like {font_name:font_path}"""
         for attach in attachments_paths:
             self.__font_dict[Font.get_font_name(attach)] = attach
 
@@ -118,9 +124,7 @@ class MetaContainer:
                 self.__missing_fonts.append(font)
 
     def __get_streams(self, container_id, container_path):
-        """ Create stream entity from all containers.
-
-        """
+        """Create stream entity from all containers."""
         stream_path = None
         ffmpeg_probe = probe(container_path)
         if len(ffmpeg_probe["streams"]) <= 1:
