@@ -1,38 +1,14 @@
+from alive_progress import VERSION
 import click
-from scanus import Scanus
+from scanus import __scan
 from container import Stream, MetaContainer
 from argument import Argument
 from ffmpeg_progressbar import exec_with_progress
 
-version = '0.2.0'
-
-def __scan(path, special, verbose, silent):
-    scanner = Scanus()
-    scanner.search_sp = special
-    scanner.scan_directory(path)
-    if not silent:
-        click.echo("Scan directory: {}".format(path))
-        if len(scanner.container_list):
-            result_str = "Found {} containers.".format(len(scanner.container_list))
-            if len(scanner.attach_list):
-                result_str = result_str[:-1] + ", with {} attachments".format(
-                    len(scanner.attach_list)
-                )
-            click.echo(result_str)
-        else:
-            click.echo("Containers not found.", err=True)
-        if verbose:
-            for i, container in enumerate(scanner.container_list, start=1):
-                click.echo("Container №{0}:".format(i))
-                for i, file in enumerate(container, start=1):
-                    click.echo("{:3d}. ".format(i) + "%s" % click.format_filename(file))
-            print("\nAttachments:")
-            for i, attach in enumerate(scanner.attach_list, start=1):
-                click.echo("{:3d}. ".format(i) + "%s" % click.format_filename(attach))
-    return (scanner.container_list, scanner.attach_list)
+VERSION = '0.2.0'
 
 @click.command()
-@click.version_option(version)
+@click.version_option(VERSION)
 @click.argument("path", type=click.Path())
 @click.option("-v", "--verbose", is_flag=True, help="Enable verbose mode")
 @click.option("-s", "--silent", is_flag=True, help="Enable silent mode")

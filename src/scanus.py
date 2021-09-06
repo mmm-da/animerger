@@ -78,6 +78,33 @@ class Scanus:
     def attach_list(self):
         return list(self._attach_dict.values())
 
+def __scan(path, special, verbose, silent):
+    scanner = Scanus()
+    scanner.search_sp = special
+    scanner.scan_directory(path)
+    if not silent:
+        click.echo("Scan directory: {}".format(path))
+        if len(scanner.container_list):
+            result_str = "Found {} containers.".format(len(scanner.container_list))
+            if len(scanner.attach_list):
+                result_str = result_str[:-1] + ", with {} attachments".format(
+                    len(scanner.attach_list)
+                )
+            click.echo(result_str)
+        else:
+            click.echo("Containers not found.", err=True)
+        if verbose:
+            for i, container in enumerate(scanner.container_list, start=1):
+                click.echo("Container №{0}:".format(i))
+                for i, file in enumerate(container, start=1):
+                    click.echo("{:3d}. ".format(i) + "%s" % click.format_filename(file))
+            print("\nAttachments:")
+            for i, attach in enumerate(scanner.attach_list, start=1):
+                click.echo("{:3d}. ".format(i) + "%s" % click.format_filename(attach))
+    return (scanner.container_list, scanner.attach_list)
+
+
 
 if __name__ == "__main__":
     print("Scanus isn't executable module")
+
