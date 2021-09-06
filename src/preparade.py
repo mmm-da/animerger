@@ -4,7 +4,7 @@ from pathlib import Path
 
 from pyunpack import Archive
 
-from .settings import archive_extensions
+from constants import ARCHIVE_EXTENSIONS
 
 
 class TempDir:
@@ -22,17 +22,11 @@ class TempDir:
 
 
 def unpack_all_archives(path, temp_path):
-    """Unpacks all archives in folder and subfolders from path into temp_path
-       
-       Keyword arguments:
-       path      -- path to anime release
-       temp_path -- path to temp directory
-    """
     path = Path(path)
     for i in path.iterdir():
         if i.isdir():
             unpack_all_archives(path, temp_path)
-        elif i.suffix.lower() in archive_extensions:
+        elif i.suffix.lower() in ARCHIVE_EXTENSIONS:
             archive = Archive(str(i))
             archive.extractall(temp_path)
 

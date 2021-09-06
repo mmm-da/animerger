@@ -103,6 +103,30 @@ def __scan(path, special, verbose, silent):
                 click.echo("{:3d}. ".format(i) + "%s" % click.format_filename(attach))
     return (scanner.container_list, scanner.attach_list)
 
+def merge():
+    container_list, attach_list = __scan(path, special, verbose, silent)
+    command_list = list()
+
+    for i, container in enumerate(container_list, start=1):
+        meta_container = MetaContainer(container, attach_list, name_template, title,parse_name=parse_name)
+        command = Argument.compile_mkv(
+            meta_container,
+            video_codec=video_codec,
+            audio_codec=audio_codec,
+            additional_args=additional_args,
+            save_path=save_path
+        )
+        command_list.append(command)
+        if not silent:
+            if only_compile:
+                click.echo("Command: ")
+                click.echo(command)
+            if verbose:
+                click.echo("Streams: ")
+                for stream in meta_container.stream_list:
+                    print(stream)
+        if not only_compile:
+            exec_with_progress(command,title=meta_container.name)
 
 
 if __name__ == "__main__":
