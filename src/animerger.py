@@ -3,10 +3,9 @@ import typer
 from typing import Optional
 
 from constants import VERSION
-from environment import Environment
+from environment import environment
 
 app = typer.Typer()
-environment = Environment()
 
 def version_callback(value: bool):
     if value:

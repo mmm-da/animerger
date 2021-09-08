@@ -10,3 +10,4 @@ pyinstaller     ==  4.3
 alive-progress  ==  1.6.2
 typer           ==  0.4.0
 appdirs         ==  1.4.4
+pyyaml          ==  5.4.1

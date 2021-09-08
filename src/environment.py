@@ -4,6 +4,13 @@ import appdirs
 from constants import VERSION
 
 class Environment:
+    _INSTANCE = None
+  
+    def __new__(cls, *args, **kwargs):
+        if not cls._INSTANCE:
+            cls._INSTANCE = super(Environment, cls).__new__(cls, *args, **kwargs)
+        return cls._INSTANCE
+
     def __init__(self):
         self._platform = platform.platform()
         self._platform_version = platform.version()
@@ -45,3 +52,4 @@ class Environment:
     def profile_dir(self):
         return self._profile_dir
 
+environment = Environment()
