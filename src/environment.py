@@ -51,5 +51,3 @@ class Environment:
     @property
     def profile_dir(self):
         return self._profile_dir
-
-environment = Environment()
