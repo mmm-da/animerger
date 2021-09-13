@@ -33,7 +33,7 @@ def verbose_callback(value: int):
 
 
 def prepare_context(cmd_args: dict, environment: Environment, profiles: dict) -> dict:
-    return  | vars(environment) | profiles | cmd_args
+    return vars(environment) | profiles | cmd_args
 
 
 @app.command()
@@ -59,11 +59,7 @@ def merge(
         None, "--version", callback=version_callback
     ),
 ):
-    context = prepare_context(
-        locals(),
-        environment,
-        get_profiles(environment)
-    )
+    context = prepare_context(locals(), environment, get_profiles(environment))
 
 
 if __name__ == "__main__":
